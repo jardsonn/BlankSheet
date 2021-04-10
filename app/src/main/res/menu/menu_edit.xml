@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+    <item
+        android:id="@+id/item_menu_edit_undo"
+        android:enabled="false"
+        android:icon="@drawable/ic_round_undo"
+        android:title="@string/desfazer"
+        app:showAsAction="always"
+        tools:ignore="AlwaysShowAction" />
+
+    <item
+        android:id="@+id/item_menu_edit_redo"
+        android:enabled="false"
+        android:icon="@drawable/ic_round_redo"
+        android:title="@string/refazer"
+        app:showAsAction="always" />
+
+    <item
+        android:id="@+id/item_menu_edit_preview"
+        android:icon="@drawable/ic_round_preview"
+        android:title="@string/prever"
+        app:showAsAction="always" />
+
+    <item
+        android:id="@+id/item_menu_edit_save"
+        android:enabled="false"
+        android:icon="@drawable/ic_round_save"
+        android:title="@string/salvar"
+        app:showAsAction="always" />
+
+</menu>

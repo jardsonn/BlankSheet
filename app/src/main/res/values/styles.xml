@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:tools="http://schemas.android.com/tools">
+
+    <style name="EditorTitleStyle">
+        <item name="android:textSize">@dimen/title_size_edit</item>
+        <item name="android:maxLength">100</item>
+        <item name="android:scrollbarSize">0dp</item>
+        <item name="android:paddingEnd">@dimen/margin_edit</item>
+        <item name="android:paddingStart">@dimen/margin_edit</item>
+        <item name="android:paddingBottom">@dimen/margin_edit</item>
+        <item name="android:gravity">center_horizontal</item>
+        <item name="android:background">@android:color/transparent</item>
+        <item name="android:requiresFadingEdge">horizontal</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:textColor">@color/text_edit_color</item>
+        <item name="android:textCursorDrawable">@drawable/custom_cursor</item>
+        <item name="android:textColorHighlight">@color/color_selection_text</item>
+    </style>
+
+    <style name="EditorTextStyle" parent="Widget.AppCompat.EditText">
+        <item name="android:textSize">@dimen/text_size_edit</item>
+        <item name="android:textColor">@color/text_edit_color</item>
+        <item name="android:gravity">top|start</item>
+        <item name="android:background">@android:color/transparent</item>
+        <item name="android:paddingEnd">@dimen/margin_edit</item>
+        <item name="android:paddingStart">@dimen/margin_edit</item>
+        <item name="android:textCursorDrawable">@drawable/custom_cursor</item>
+        <item name="android:paddingBottom">@dimen/margin_edit</item>
+        <item name="android:imeOptions">flagNoExtractUi</item>
+        <item name="android:inputType">textMultiLine</item>
+        <item name="android:textColorHighlight">@color/color_selection_text</item>
+    </style>
+
+    <style name="JcsAnimationToast">
+        <item name="android:windowEnterAnimation">@anim/slide_in_bottom</item>
+        <item name="android:windowExitAnimation">@anim/slide_out_bottom</item>
+    </style>
+
+    <style name="AnimDialog">
+        <item name="android:windowEnterAnimation">@anim/slide_in_bottom</item>
+        <item name="android:windowExitAnimation">@anim/slide_out_bottom</item>
+    </style>
+
+    <style name="ThemeOverlay.App.BottomSheetDialog" parent="ThemeOverlay.MaterialComponents.Dialog">
+        <item name="android:windowIsFloating">false</item>
+        <item name="android:windowBackground">@android:color/transparent</item>
+        <item name="android:windowAnimationStyle">@style/AnimDialog</item>
+        <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="bottomSheetStyle">@style/Widget.App.BottomSheet.Modal</item>
+        <item name="android:navigationBarColor">?colorSurface</item>
+        <item name="android:navigationBarDividerColor" tools:targetApi="o_mr1">@android:color/transparent</item>
+        <item name="android:windowLightStatusBar" tools:ignore="NewApi">false</item>
+    </style>
+
+    <style name="Widget.App.BottomSheet.Modal" parent="Widget.MaterialComponents.BottomSheet.Modal">
+        <item name="shapeAppearance">@style/ShapeAppearance.App.BottomSheet</item>
+    </style>
+
+    <style name="ShapeAppearance.App.BottomSheet" parent="ShapeAppearance.MaterialComponents">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSizeTopLeft">16dp</item>
+        <item name="cornerSizeTopRight">16dp</item>
+        <item name="cornerSizeBottomLeft">0dp</item>
+        <item name="cornerSizeBottomRight">0dp</item>
+    </style>
+
+
+    <style name="RadioButtonStyle" parent="Widget.AppCompat.CompoundButton.RadioButton">
+        <item name="android:gravity">center_vertical</item>
+        <item name="android:textColor">@color/color_dialog_options</item>
+        <item name="android:textSize">@dimen/dialog_text_message_size</item>
+    </style>
+</resources>

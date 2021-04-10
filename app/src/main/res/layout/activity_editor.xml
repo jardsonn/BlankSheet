@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".ui.EditorActivity">
+
+    <com.google.android.material.appbar.AppBarLayout
+        android:id="@+id/appbar_edit"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:visibility="gone">
+
+        <androidx.appcompat.widget.Toolbar
+            android:id="@+id/toolbar_edit"
+            android:layout_width="match_parent"
+            android:layout_height="?attr/actionBarSize" />
+
+    </com.google.android.material.appbar.AppBarLayout>
+
+
+    <ScrollView
+        android:id="@+id/scroll_view_editor"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:clipToPadding="true"
+        android:fillViewport="true">
+
+        <RelativeLayout
+            android:id="@+id/relative_layout_edit_container"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:transitionName="animation_container">
+
+            <FrameLayout
+                android:id="@+id/title_container"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:descendantFocusability="beforeDescendants"
+                android:focusableInTouchMode="true">
+
+                <TextView
+                    android:id="@+id/text_title_from_editor"
+                    style="@style/EditorTitleStyle"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="10dp"
+                    android:visibility="gone" />
+
+                <EditText
+                    android:id="@+id/edit_title"
+                    style="@style/EditorTitleStyle"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="10dp"
+                    android:ems="10"
+                    android:hint="@string/title"
+                    android:imeOptions="actionDone|flagNoExtractUi"
+                    android:importantForAutofill="no"
+                    android:inputType="textCapWords|textImeMultiLine">
+
+                    <requestFocus />
+                </EditText>
+
+            </FrameLayout>
+
+            <FrameLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_below="@id/title_container">
+
+                <ImageView
+                    android:id="@+id/img_editor_hint"
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:contentDescription="@string/image_hint_description"
+                    android:scaleType="centerInside"
+                    android:src="@drawable/ic_paragraph"
+                    app:tint="#B6B6B6" />
+
+                <TextView
+                    android:id="@+id/text_content_from_editor"
+                    style="@style/EditorTextStyle"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:visibility="gone"
+                    tools:ignore="HardcodedText" />
+
+                <EditText
+                    android:id="@+id/edit_content"
+                    style="@style/EditorTextStyle"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:importantForAutofill="no"
+                    tools:ignore="HardcodedText,LabelFor" />
+
+
+            </FrameLayout>
+        </RelativeLayout>
+    </ScrollView>
+
+    <ImageButton
+        android:id="@+id/btn_show_appbar"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:layout_alignParentEnd="true"
+        android:layout_marginTop="10dp"
+        android:layout_marginEnd="16dp"
+        android:background="@drawable/bg_round_down_button"
+        android:tint="@color/colorPrimaryVariant"
+        app:srcCompat="@drawable/ic_round_arrow_down" />
+
+    <RelativeLayout
+        android:id="@+id/container_shadow_editor"
+        android:layout_width="match_parent"
+        android:layout_height="59dp"
+        android:layout_alignParentTop="true">
+
+        <View
+            android:id="@+id/view_shadow_action_mode"
+            android:layout_width="match_parent"
+            android:layout_height="3dp"
+            android:layout_alignParentBottom="true"
+            android:background="@drawable/shadow_action_mode"
+            android:visibility="invisible" />
+
+    </RelativeLayout>
+
+</RelativeLayout>

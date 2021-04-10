@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/card_item_content"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:checkable="true"
+    android:clickable="true"
+    android:focusable="true"
+    android:transitionName="animation_container"
+    app:cardCornerRadius="0dp"
+    app:cardElevation="0dp"
+    app:checkedIcon="@null"
+    app:contentPaddingLeft="@dimen/margin_item_row"
+    app:contentPaddingRight="@dimen/margin_item_row">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@null"
+        android:orientation="horizontal"
+        android:paddingStart="0dp"
+        android:paddingEnd="10dp">
+
+        <FrameLayout
+            android:id="@+id/background_icon"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:layout_marginEnd="7dp"
+            tools:background="#0091CC">
+
+            <ImageView
+                android:id="@+id/image_icon_text"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:layout_gravity="center"
+                android:contentDescription="@string/description_icon_text"
+                android:gravity="center" />
+
+            <FrameLayout
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:layout_gravity="center"
+                android:gravity="center">
+
+                <TextView
+                    android:id="@+id/text_icon"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:textSize="20sp"
+                    android:textStyle="bold"
+                    tools:text="T" />
+            </FrameLayout>
+
+            <ImageView
+                android:id="@+id/image_icon_checked"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:layout_gravity="center"
+                android:contentDescription="@string/description_icon_text"
+                android:gravity="center"
+                android:scaleType="centerInside"
+                android:src="@drawable/ic_round_check"
+                android:visibility="gone" />
+
+        </FrameLayout>
+
+        <LinearLayout
+            android:id="@+id/linearlayout_list_item"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:paddingTop="14dp"
+            android:paddingBottom="14dp">
+
+            <TextView
+                android:id="@+id/textview_row_title"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:singleLine="true"
+                android:textColor="@color/row_title_color"
+                android:textSize="15sp"
+                android:textStyle="bold"
+                tools:text="Title" />
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="20dp"
+                android:foregroundGravity="center_vertical">
+
+                <ImageView
+                    android:id="@+id/image_date_row"
+                    android:layout_width="12dp"
+                    android:layout_height="12dp"
+                    android:layout_marginTop="4dp"
+                    android:layout_marginEnd="3dp"
+                    android:scaleType="centerInside"
+                    android:src="@drawable/ic_round_time"
+                    app:tint="@color/row_date_color" />
+
+                <TextView
+                    android:id="@+id/textview_row_data"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_centerVertical="true"
+                    android:layout_toEndOf="@id/image_date_row"
+                    android:textColor="@color/row_date_color"
+                    android:textSize="@dimen/row_date_size"
+                    tools:text="20 de set de 2020 02:35 PM" />
+            </RelativeLayout>
+        </LinearLayout>
+    </LinearLayout>
+</com.google.android.material.card.MaterialCardView>

@@ -1,0 +1,48 @@
+<resources>
+    <string name="app_name">Blank Sheet</string>
+
+    <string name="title">Título</string>
+    <string name="sua_anotacao">Sua anotação</string>
+    <string name="titulo_vazio">O título não pode ficar vazio!</string>
+    <string name="salvo_com_sucesso">Salvo com sucesso!</string>
+    <string name="ocorreu_um_erro_ao_salvar">Ocorreu um erro  ao salvar</string>
+    <string name="excluir">Excluir</string>
+    <string name="editar_conteudo">Editar</string>
+    <string name="desfazer">Desfazer</string>
+    <string name="excluido">Excluido</string>
+    <string name="buscar">Buscar</string>
+    <string name="search_hint">Buscar&#8230;</string>
+
+    <string name="order_by">Ordenar por:</string>
+    <string name="by_name_az">Nome (A - Z)</string>
+    <string name="by_name_za">Nome (Z - A)</string>
+    <string name="by_date_most_recent">Data (mais recente)</string>
+    <string name="by_date_oldest">Data (mais antigo)</string>
+
+    <string name="cancelar">Cancelar</string>
+    <string name="ok">OK</string>
+    <string name="selecionar_tudo">Selecionar tudo</string>
+    <string name="refazer">Refazer</string>
+    <string name="prever">Prever</string>
+    <string name="editar">Editar</string>
+    <string name="salvar">Salvar</string>
+    <string name="image_hint_description">"Image quote hint for editor "</string>
+    <string name="cortar">Recordar</string>
+    <string name="copiar">Copiar</string>
+    <string name="colar">Colar</string>
+    <string name="atualizado_com_sucesso">Atualizado com sucesso!</string>
+
+    <string name="save_conversation">Save conversation</string>
+    <string name="description_icon_text">Icon que irá mostrar a primeira letra do título</string>
+
+    <string name="permission">Permissão</string>
+    <string name="message_need_permission_storage">Write Mark necessita de permissão para acessar arquivos de texto.</string>
+    <string name="message_need_permission_storage_ultimate">Você precisa concerder a permissão para acessar arquivos de texto. Caso contrário, fica impossível ler, editar, compartilhar e receber arquivos de texto. Se estar de acordo, clique no botão de ir para as configurações.</string>
+    <string name="go_to_settings">Ir para as configurações</string>
+    <string name="grant">Conceder</string>
+    <string name="deny">Negar</string>
+
+    <string name="sort">Ordenar</string>
+    <string name="switch_to_grid">Alternar visualização para grade</string>
+    <string name="switch_to_list">Alternar visualização para lista</string>
+</resources>

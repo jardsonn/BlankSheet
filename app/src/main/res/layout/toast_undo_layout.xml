@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+    <androidx.cardview.widget.CardView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="10dp"
+        app:cardBackgroundColor="@color/toast_background_color"
+        app:cardCornerRadius="@dimen/toast_radius"
+        app:contentPadding="@dimen/toast_content_padding">
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <FrameLayout
+                android:id="@+id/frame_layout_progress"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerVertical="true"
+                android:foregroundGravity="center">
+
+                <TextView
+                    android:id="@+id/progress_toast_count"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:textColor="@color/white"
+                    android:textSize="@dimen/text_count_progress_size"
+                    tools:text="5" />
+
+                <com.mikhaellopez.circularprogressbar.CircularProgressBar
+                    android:id="@+id/progress_toast"
+                    android:layout_width="25dp"
+                    android:layout_height="25dp"
+                    android:layout_gravity="center"
+                    app:cpb_background_progressbar_color="@color/white"
+                    app:cpb_background_progressbar_width="1dp"
+                    app:cpb_progress="6"
+                    app:cpb_progress_direction="to_left"
+                    app:cpb_progress_max="6"
+                    app:cpb_progressbar_color="@color/colorSecondary"
+                    app:cpb_progressbar_width="2dp"
+                    app:cpb_round_border="true" />
+            </FrameLayout>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerVertical="true"
+                android:layout_marginStart="5dp"
+                android:layout_toEndOf="@id/frame_layout_progress"
+                android:text="@string/excluido"
+                android:textColor="@color/white"
+                android:textSize="@dimen/text_undo_toast_size"
+                android:textStyle="bold"
+                tools:ignore="RelativeOverlap" />
+
+            <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerVertical="true"
+                android:layout_toStartOf="@id/text_toast_undo"
+                android:scaleType="centerInside"
+                android:src="@drawable/ic_round_undo"
+                app:tint="@color/colorSecondary"
+                tools:ignore="ContentDescription" />
+
+            <TextView
+                android:id="@+id/text_toast_undo"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentEnd="true"
+                android:layout_centerVertical="true"
+                android:layout_marginStart="10dp"
+                android:clickable="true"
+                android:focusable="true"
+                android:gravity="center"
+                android:text="@string/desfazer"
+                android:textAllCaps="true"
+                android:textAppearance="?textAppearanceButton"
+                android:textColor="@color/colorSecondary"
+                android:textSize="@dimen/text_undo_toast_size"
+                android:textStyle="bold"
+                app:iconSize="19dp" />
+        </RelativeLayout>
+    </androidx.cardview.widget.CardView>
+</FrameLayout>

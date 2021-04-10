@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="colorPrimary">#FFFFFF</color>
+    <color name="colorPrimaryVariant">#6DB5B5B5</color>
+    <color name="colorOnPrimary">#393939</color>
+    <color name="colorSecondary">#00CA72</color>
+    <color name="colorSecondaryVariant">#00CA72</color>
+    <color name="colorOnSecondary">#FFFFFF</color>
+
+    <color name="colorPrimaryDark">#FFFFFF</color>
+    <color name="colorPrimaryVariantDark">#FFFFFF</color>
+    <color name="colorOnPrimaryDark">#FFFFFF</color>
+    <color name="colorSecondaryDark">#FFFFFF</color>
+    <color name="colorSecondaryVariantDark">#F5F5F5</color>
+    <color name="colorOnSecondaryDark">#FFFFFF</color>
+
+    <color name="color_appbar">#393939</color>
+    <color name="color_appbar_dark">#B3B3B3</color>
+
+    <color name="appbar_color_icon">@color/colorOnPrimary</color>
+    <color name="appbar_color_icon_dark">#FFFFFF</color>
+    <color name="appbar_color_disabled">#8F393939</color>
+    <color name="appbar_color_disabled_ark">#BEFFFFFF</color>
+
+    <color name="checked_card">#2700CA72</color>
+    <color name="check_icon_background_color">#00CA72</color>
+
+    <color name="grey_800">#343434</color>
+    <color name="grey_900">#171717</color>
+    <color name="black">#FF000000</color>
+    <color name="white">#FFFFFFFF</color>
+    <color name="row_title_color">#333333</color>
+    <color name="row_date_color">#999999</color>
+    <color name="text_edit_color">#242424</color>
+
+    <color name="search_anim_bg">#AE888888</color>
+    <color name="search_field_bg">@color/white_ish</color>
+
+    <color name="transparent">#00FFFFFF</color>
+    <color name="white_alpha_38">#60FFFFFF</color>
+    <color name="white_50">#88ffffff</color>
+    <color name="white_ish">#fffefefe</color>
+
+    <color name="color_selection_text">#B000CA72</color>
+    <color name="color_cursor">#00CF6A</color>
+    <color name="color_column_selection">#9E9E9E</color>
+    <color name="toast_background_color">#C8373737</color>
+
+    <color name="color_dialog_title">#4C4C4C</color>
+    <color name="color_dialog_options">#393838</color>
+</resources>
