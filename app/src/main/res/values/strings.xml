@@ -45,4 +45,5 @@
     <string name="sort">Ordenar</string>
     <string name="switch_to_grid">Alternar visualização para grade</string>
     <string name="switch_to_list">Alternar visualização para lista</string>
+    <string name="hint_editor">Comece a escrever...</string>
 </resources>

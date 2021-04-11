@@ -45,20 +45,17 @@
                     style="@style/EditorTitleStyle"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="10dp"
+                    android:textIsSelectable="true"
+                    android:hint="@string/title"
                     android:visibility="gone" />
 
                 <EditText
                     android:id="@+id/edit_title"
-                    style="@style/EditorTitleStyle"
+                    style="@style/EditorTitleStyle.Edit"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="10dp"
-                    android:ems="10"
                     android:hint="@string/title"
-                    android:imeOptions="actionDone|flagNoExtractUi"
-                    android:importantForAutofill="no"
-                    android:inputType="textCapWords|textImeMultiLine">
+                    android:importantForAutofill="no">
 
                     <requestFocus />
                 </EditText>
@@ -68,16 +65,9 @@
             <FrameLayout
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:layout_below="@id/title_container">
-
-                <ImageView
-                    android:id="@+id/img_editor_hint"
-                    android:layout_width="24dp"
-                    android:layout_height="24dp"
-                    android:contentDescription="@string/image_hint_description"
-                    android:scaleType="centerInside"
-                    android:src="@drawable/ic_paragraph"
-                    app:tint="#B6B6B6" />
+                android:layout_below="@id/title_container"
+                android:descendantFocusability="beforeDescendants"
+                android:focusableInTouchMode="true">
 
                 <TextView
                     android:id="@+id/text_content_from_editor"
@@ -85,17 +75,17 @@
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:visibility="gone"
+                    android:textIsSelectable="true"
                     tools:ignore="HardcodedText" />
 
                 <EditText
                     android:id="@+id/edit_content"
-                    style="@style/EditorTextStyle"
+                    style="@style/EditorTextStyle.Edit"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
+                    android:hint="@string/hint_editor"
                     android:importantForAutofill="no"
                     tools:ignore="HardcodedText,LabelFor" />
-
-
             </FrameLayout>
         </RelativeLayout>
     </ScrollView>
@@ -108,7 +98,7 @@
         android:layout_marginTop="10dp"
         android:layout_marginEnd="16dp"
         android:background="@drawable/bg_round_down_button"
-        android:tint="@color/colorPrimaryVariant"
+        android:tint="@color/colorSecondary"
         app:srcCompat="@drawable/ic_round_arrow_down" />
 
     <RelativeLayout

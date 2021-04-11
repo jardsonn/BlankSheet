@@ -2,6 +2,7 @@ package com.jcs.blanksheet.utils
 
 import android.Manifest
 import android.annotation.SuppressLint
+import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
@@ -9,8 +10,10 @@ import android.content.res.TypedArray
 import android.graphics.drawable.GradientDrawable
 import android.net.Uri
 import android.os.Build
-import android.view.ViewAnimationUtils
+import android.view.View
+import android.view.inputmethod.InputMethodManager
 import android.widget.EditText
+import android.widget.TextView
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
@@ -51,11 +54,7 @@ class JcsUtils {
         val formatUSA = SimpleDateFormat(PATTERN_FORMAT_DATE_USA, usa)
         val formatBR = SimpleDateFormat(PATTERN_FORMAT_DATE_BR, br)
         val format = SimpleDateFormat(PATTERN_FORMAT_DATE_DEFAULT, Locale.getDefault())
-//        return when (defaultLocale) {
-//            usa -> formatUSA.format(calendar.time)
-//            br, pt -> formatBR.format(calendar.time)
-//            else -> format.format(calendar.time)
-//        }
+
         return when (defaultLocale) {
             usa -> formatUSA.format(calendar.time)
             br, pt -> formatBR.format(calendar.time)
@@ -63,10 +62,6 @@ class JcsUtils {
         }
     }
 
-    fun actualDateListGrid(date: Calendar): String{
-        val format = SimpleDateFormat(PATTERN_FORMAT_DATE_DEFAULT, Locale.getDefault())
-        return format.format(date)
-    }
 
     /**
      * Obtem a data atual em milissegundos
@@ -177,6 +172,11 @@ class JcsUtils {
             }
 
         }
+    }
+
+    fun hideKeyboard(activity: AppCompatActivity) {
+        (activity.getSystemService(Activity.INPUT_METHOD_SERVICE) as InputMethodManager)
+            .hideSoftInputFromWindow(activity.currentFocus!!.windowToken, 0)
     }
 //
 //    fun openFile(activity: AppCompatActivity?, isTitle: Boolean): String {

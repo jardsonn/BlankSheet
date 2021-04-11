@@ -1,7 +1,9 @@
 package com.jcs.blanksheet.utils
+
 import android.content.Context
 import android.content.SharedPreferences
 import android.text.Editable
+import android.text.InputType
 import android.text.Selection
 import android.text.TextWatcher
 import android.text.style.UnderlineSpan
@@ -12,13 +14,19 @@ import androidx.core.content.ContextCompat
 import androidx.core.graphics.drawable.DrawableCompat
 import androidx.core.widget.addTextChangedListener
 import com.jcs.blanksheet.R
+import io.noties.markwon.*
+import io.noties.markwon.image.AsyncDrawableLoader
+import org.commonmark.ext.gfm.strikethrough.Strikethrough
+import org.commonmark.ext.gfm.strikethrough.StrikethroughExtension
+import org.commonmark.node.SoftLineBreak
+import org.commonmark.parser.Parser
 import java.util.*
 
 /**
  * Created by Jardson Costa on 23/03/2021.
  */
 
-class EditorUtil(private val mEditText: EditText) {
+class EditorUtil(private val editTitle: EditText, private val editContent: EditText) {
     private val mEditorHistory: EditorHistory
 
     private val mEditTextChangeListener: EditTextChangeListener
@@ -31,6 +39,10 @@ class EditorUtil(private val mEditText: EditText) {
 
     private var menuItemSave: MenuItem? = null
 
+    private var markwon: Markwon? = null
+
+    private var changedText = false
+
     fun textUndoRedoObserver(menu: Menu?) {
         textRedoObserver(menu)
         textUndoObserver(menu)
@@ -39,65 +51,106 @@ class EditorUtil(private val mEditText: EditText) {
     private fun textUndoObserver(menu: Menu?) {
         menuItemUndo = menu?.findItem(R.id.item_menu_edit_undo)
         menuItemSave = menu?.findItem(R.id.item_menu_edit_save)
-        changeMenuIconColor(mEditText.context, menuItemUndo)
-        changeMenuIconColor(mEditText.context, menuItemSave)
-        mEditText.addTextChangedListener { s ->
+        changeMenuIconColor(editContent.context, menuItemUndo)
+        changeMenuIconColor(editContent.context, menuItemSave)
+
+        editTitle.addTextChangedListener { s ->
+            menuItemSave?.isEnabled = !(s!!.isEmpty() && editContent.text.isEmpty())
+            changeMenuIconColor(editContent.context, menuItemSave)
+        }
+
+        editContent.addTextChangedListener { s ->
             menuItemUndo?.isEnabled = availableToUndo()
-            changeMenuIconColor(mEditText.context, menuItemUndo)
-            if (s!!.isEmpty()) {
+            changeMenuIconColor(editContent.context, menuItemUndo)
+            if (s!!.isEmpty() && editTitle.text.isEmpty()) {
                 menuItemSave?.isEnabled = false
             } else {
-                menuItemSave?.isEnabled = availableToUndo()
+                if (editTitle.text.isNotEmpty())
+                    menuItemSave?.isEnabled = true
+                else
+                    menuItemSave?.isEnabled = availableToUndo()
             }
-            changeMenuIconColor(mEditText.context, menuItemSave)
+            changeMenuIconColor(editContent.context, menuItemSave)
         }
     }
 
     private fun textRedoObserver(menu: Menu?) {
         menuItemRedo = menu?.findItem(R.id.item_menu_edit_redo)
         menuItemSave = menu?.findItem(R.id.item_menu_edit_save)
-        changeMenuIconColor(mEditText.context, menuItemRedo)
-        changeMenuIconColor(mEditText.context, menuItemSave)
-        mEditText.addTextChangedListener { s ->
+        changeMenuIconColor(editContent.context, menuItemRedo)
+        changeMenuIconColor(editContent.context, menuItemSave)
+
+        editTitle.addTextChangedListener { s ->
+            menuItemSave?.isEnabled = !(s!!.isEmpty() && editContent.text.isEmpty())
+            changeMenuIconColor(editContent.context, menuItemSave)
+        }
+
+        editContent.addTextChangedListener { s ->
             menuItemRedo?.isEnabled = availableToRedo()
-            changeMenuIconColor(mEditText.context, menuItemRedo)
-            if (s!!.isEmpty()) {
+            changeMenuIconColor(editContent.context, menuItemRedo)
+            if (s!!.isEmpty() && editTitle.text.isEmpty()) {
                 menuItemSave?.isEnabled = false
             } else {
-                menuItemSave?.isEnabled = availableToRedo()
+                if (editTitle.text.isNotEmpty())
+                    menuItemSave?.isEnabled = true
+                else
+                    menuItemSave?.isEnabled = availableToUndo()
             }
-            changeMenuIconColor(mEditText.context, menuItemSave)
+            changeMenuIconColor(editContent.context, menuItemSave)
         }
     }
 
     fun clearHistory() {
+        changedText = false
         mEditorHistory.clear()
-        true.changeMenuIconColor(mEditText.context, menuItemRedo)
-        true.changeMenuIconColor(mEditText.context, menuItemUndo)
-        true.changeMenuIconColor(mEditText.context, menuItemSave)
+        true.changeMenuIconColor(editContent.context, menuItemRedo)
+        true.changeMenuIconColor(editContent.context, menuItemUndo)
+        true.changeMenuIconColor(editContent.context, menuItemSave)
     }
 
-    private fun Boolean.changeMenuIconColor(context: Context?, menuItem: MenuItem?) {
+    fun Boolean.changeMenuIconColor(context: Context, menuItem: MenuItem?) {
         menuItem?.isEnabled = !this
         this@EditorUtil.changeMenuIconColor(context, menuItem)
     }
 
-    private fun changeMenuIconColor(context: Context?, menuItem: MenuItem?) {
+    fun changeMenuIconColor(context: Context, menuItem: MenuItem?) {
         menuItem?.icon?.let {
             if (menuItem.isEnabled) {
                 DrawableCompat.setTint(
                     it,
-                    ContextCompat.getColor(context!!, R.color.appbar_color_icon)
+                    ContextCompat.getColor(context, R.color.appbar_color_icon)
                 )
             } else {
                 DrawableCompat.setTint(
                     it,
                     ContextCompat.getColor(
-                        context!!,
+                        context,
                         R.color.appbar_color_disabled
                     )
                 )
             }
+        }
+    }
+
+    fun restoreMenu() {
+        menuItemSave!!.isEnabled = editTitle.text.isNotEmpty() && editContent.text.isNotEmpty() || changedText
+        menuItemRedo!!.isEnabled = availableToRedo()
+        menuItemUndo!!.isEnabled = availableToUndo()
+    }
+
+    fun unsavedContent(): Boolean {
+        return changedText
+    }
+
+    fun makeEditableText(isEditable: Boolean) {
+        if (isEditable) {
+            editTitle.inputType = InputType.TYPE_NULL
+            editContent.inputType = InputType.TYPE_NULL
+            editTitle.setTextIsSelectable(true)
+            editContent.setTextIsSelectable(true)
+        } else {
+            editTitle.inputType = InputType.TYPE_CLASS_TEXT
+            editContent.inputType = InputType.TYPE_CLASS_TEXT
         }
     }
 
@@ -106,7 +159,7 @@ class EditorUtil(private val mEditText: EditText) {
     }
 
     fun disconnect() {
-        mEditText.removeTextChangedListener(mEditTextChangeListener)
+        editContent.removeTextChangedListener(mEditTextChangeListener)
     }
 
     private fun availableToUndo(): Boolean {
@@ -119,7 +172,7 @@ class EditorUtil(private val mEditText: EditText) {
 
     fun undo() {
         val edit: EditorItem = mEditorHistory.previous ?: return
-        val text = mEditText.editableText
+        val text = editContent.editableText
         val start = edit.mStart
         val end = start + if (edit.mAfter != null) edit.mAfter.length else 0
         mIsUndoOrRedo = true
@@ -136,7 +189,7 @@ class EditorUtil(private val mEditText: EditText) {
 
     fun redo() {
         val edit: EditorItem = mEditorHistory.next ?: return
-        val text = mEditText.editableText
+        val text = editContent.editableText
         val start = edit.mStart
         val end = start + if (edit.mBefore != null) edit.mBefore.length else 0
         mIsUndoOrRedo = true
@@ -149,7 +202,7 @@ class EditorUtil(private val mEditText: EditText) {
     }
 
     fun storePersistentState(editor: SharedPreferences.Editor, prefix: String) {
-        editor.putString(prefix + HASH_KEY, mEditText.text.toString().hashCode().toString())
+        editor.putString(prefix + HASH_KEY, editContent.text.toString().hashCode().toString())
         editor.putInt(prefix + MAX_SIZE_KEY, mEditorHistory.mMaxHistorySize)
         editor.putInt(prefix + POSITION_KEY, mEditorHistory.mPosition)
         editor.putInt(prefix + SIZE_KEY, mEditorHistory.mHistory.size)
@@ -172,7 +225,7 @@ class EditorUtil(private val mEditText: EditText) {
 
     private fun doRestorePersistentState(sp: SharedPreferences, prefix: String): Boolean {
         val hash = sp.getString(prefix + HASH_KEY, null) ?: return true
-        if (hash.toInt() != mEditText.text.toString().hashCode()) {
+        if (hash.toInt() != editContent.text.toString().hashCode()) {
             return false
         }
         mEditorHistory.clear()
@@ -273,6 +326,7 @@ class EditorUtil(private val mEditText: EditText) {
             }
             mAfterChange = s.subSequence(start, start + count)
             mEditorHistory.add(EditorItem(start, mBeforeChange, mAfterChange))
+            changedText = true
         }
 
         override fun afterTextChanged(s: Editable) {}
@@ -291,6 +345,41 @@ class EditorUtil(private val mEditText: EditText) {
     init {
         mEditorHistory = EditorHistory()
         mEditTextChangeListener = EditTextChangeListener()
-        mEditText.addTextChangedListener(mEditTextChangeListener)
+        editContent.addTextChangedListener(mEditTextChangeListener)
+
+        markwon = Markwon.builder(editContent.context)
+            .usePlugin(object : AbstractMarkwonPlugin() {
+                override fun configureParser(builder: Parser.Builder) {
+                    builder.extensions(Collections.singleton(StrikethroughExtension.create()))
+                }
+            })
+            .usePlugin(object : AbstractMarkwonPlugin() {
+                override fun configureSpansFactory(builder: MarkwonSpansFactory.Builder) {
+                    builder.setFactory(
+                        Strikethrough::class.java
+                    ) { _, _ ->
+                        Strikethrough()
+                        UnderlineSpan()
+                    }
+                }
+            })
+            .usePlugin(object : AbstractMarkwonPlugin() {
+                override fun configureConfiguration(builder: MarkwonConfiguration.Builder) {
+                    builder.asyncDrawableLoader(AsyncDrawableLoader.noOp())
+                }
+            })
+            .usePlugin(object : AbstractMarkwonPlugin() {
+                override fun configureVisitor(builder: MarkwonVisitor.Builder) {
+                    builder.on(
+                        SoftLineBreak::class.java
+                    ) { visitor, _ -> visitor.forceNewLine() }
+                }
+            })
+//            .usePlugin(HtmlPlugin.create { plugin: HtmlPlugin ->
+//                plugin.addHandler(
+//                    AlignTagHandler()
+//                )
+//            })
+            .build()
     }
 }

@@ -8,7 +8,7 @@
     <dimen name="row_title_size">18sp</dimen>
     <dimen name="row_date_size">12sp</dimen>
     <dimen name="margin_edit">5dp</dimen>
-    <dimen name="title_size_edit">20sp</dimen>
+    <dimen name="title_size_edit">14sp</dimen>
     <dimen name="text_size_edit">14sp</dimen>
     <dimen name="margin_item_row">8dp</dimen>
     <dimen name="text_undo_toast_size">15sp</dimen>

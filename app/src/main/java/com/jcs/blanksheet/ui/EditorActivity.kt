@@ -5,11 +5,7 @@ import android.content.res.Configuration
 import android.graphics.Color
 import android.os.Build
 import android.os.Bundle
-import android.text.Spannable
-import android.text.SpannableString
 import android.text.TextUtils
-import android.text.style.DynamicDrawableSpan
-import android.text.style.ImageSpan
 import android.util.Log
 import android.view.ActionMode
 import android.view.Menu
@@ -19,8 +15,8 @@ import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
 import androidx.core.content.ContextCompat
-import androidx.core.graphics.drawable.DrawableCompat
 import androidx.core.view.isVisible
+import androidx.core.view.iterator
 import androidx.core.widget.addTextChangedListener
 import androidx.lifecycle.lifecycleScope
 import com.google.android.material.appbar.AppBarLayout
@@ -28,15 +24,13 @@ import com.jcs.blanksheet.R
 import com.jcs.blanksheet.db.DocumentDao
 import com.jcs.blanksheet.db.DocumentDatabase
 import com.jcs.blanksheet.model.Document
-import com.jcs.blanksheet.utils.Constants
-import com.jcs.blanksheet.utils.EditorUtil
+import com.jcs.blanksheet.utils.*
 import com.jcs.blanksheet.utils.JcsAnimation.moveContainerEditor
 import com.jcs.blanksheet.utils.JcsAnimation.moveContentTop
-import com.jcs.blanksheet.utils.JcsUtils
-import com.jcs.blanksheet.utils.ShowHideAppBar
 import kotlinx.coroutines.InternalCoroutinesApi
 import kotlinx.coroutines.launch
 import java.util.*
+
 
 /**
  * Created by Jardson Costa on 04/04/2021.
@@ -56,8 +50,6 @@ class EditorActivity : AppCompatActivity() {
 
     private lateinit var rlEditContainer: RelativeLayout
 
-    private lateinit var imgHint: ImageView
-
     private lateinit var appBarLayout: AppBarLayout
 
     private lateinit var btnShowAppBar: ImageButton
@@ -74,7 +66,7 @@ class EditorActivity : AppCompatActivity() {
 
     private var showHideAppBar: ShowHideAppBar? = null
 
-    private var undoAndRedo: EditorUtil? = null
+    private var editorUtil: EditorUtil? = null
 
     private var isPreviewMode = false
 
@@ -89,7 +81,6 @@ class EditorActivity : AppCompatActivity() {
         editContent = findViewById(R.id.edit_content)
         textContent = findViewById(R.id.text_content_from_editor)
         scrollViewEditor = findViewById(R.id.scroll_view_editor)
-        imgHint = findViewById(R.id.img_editor_hint)
         shadowActionMode = findViewById(R.id.view_shadow_action_mode)
 
         btnShowAppBar = findViewById(R.id.btn_show_appbar)
@@ -98,8 +89,8 @@ class EditorActivity : AppCompatActivity() {
 
         val toolbar: Toolbar = findViewById(R.id.toolbar_edit)
         menu = toolbar.menu
-
         setSupportActionBar(toolbar)
+        supportActionBar!!.setDisplayShowTitleEnabled(false)
 
         lifecycleScope.launch {
             try {
@@ -108,8 +99,6 @@ class EditorActivity : AppCompatActivity() {
                 Log.e("Room database error: ", e.stackTraceToString())
             }
         }
-
-        imgHint.layoutParams.height = editContent.textSize.toInt()
 
         if (intent.extras != null) {
             val id = intent.extras!!.getInt(Constants.DOCUMENT_ID, 0)
@@ -130,61 +119,14 @@ class EditorActivity : AppCompatActivity() {
             showHideAppBar?.start()
         }
 
-//        markwon = Markwon.builder(this)
-//            .usePlugin(object : AbstractMarkwonPlugin() {
-//                override fun configureParser(builder: Parser.Builder) {
-//                    builder.extensions(Collections.singleton(StrikethroughExtension.create()))
-//                }
-//            })
-//            .usePlugin(object : AbstractMarkwonPlugin() {
-//                override fun configureSpansFactory(builder: MarkwonSpansFactory.Builder) {
-//                    builder.setFactory(
-//                        Strikethrough::class.java
-//                    ) { _, _ ->
-//                        Strikethrough()
-//                        UnderlineSpan()
-//                    }
-//                }
-//            })
-//            .usePlugin(object : AbstractMarkwonPlugin() {
-//                override fun configureConfiguration(builder: MarkwonConfiguration.Builder) {
-//                    builder.asyncDrawableLoader(AsyncDrawableLoader.noOp())
-//                }
-//            })
-//            .usePlugin(object : AbstractMarkwonPlugin() {
-//                override fun configureVisitor(builder: MarkwonVisitor.Builder) {
-//                    builder.on(
-//                        SoftLineBreak::class.java
-//                    ) { visitor, _ -> visitor.forceNewLine() }
-//                }
-//            })
-//            .usePlugin(HtmlPlugin.create { plugin: HtmlPlugin ->
-//                plugin.addHandler(
-//                    AlignTagHandler()
-//                )
-//            }).build()
-
-        undoAndRedo = EditorUtil(editContent)
-
-        imgHint.visibility = if (editContent.text.isEmpty()) View.VISIBLE else View.GONE
-
-        val imgTextSpan =
-            SpannableString(" ").setSpan(
-                ImageSpan(
-                    this,
-                    R.drawable.ic_paragraph,
-                    DynamicDrawableSpan.ALIGN_BASELINE
-                ).drawable, 0, 1, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
-            )
-
-        editContent.hint = imgTextSpan.toString()
+        editorUtil = EditorUtil(editTitle, editContent)
 
         editContent.addTextChangedListener { s ->
-            imgHint.visibility = if (s!!.isEmpty()) View.VISIBLE else View.GONE
+            // textContent.text = if (s!!.endsWith(" ")) s else s.insert(s.length, " ")
         }
 
         editTitle.addTextChangedListener { s ->
-            textTitle.text = s
+            //  textTitle.text = if (s!!.endsWith(" ")) s else s.insert(s.length, " ")
         }
     }
 
@@ -195,7 +137,6 @@ class EditorActivity : AppCompatActivity() {
         if (newConfig.orientation == Configuration.ORIENTATION_PORTRAIT) {
             actionMode?.finish()
         }
-
         super.onConfigurationChanged(newConfig)
     }
 
@@ -217,17 +158,17 @@ class EditorActivity : AppCompatActivity() {
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
         menuInflater.inflate(R.menu.menu_edit, menu)
-        undoAndRedo?.textUndoRedoObserver(menu)
+        editorUtil?.textUndoRedoObserver(menu)
         return super.onCreateOptionsMenu(menu)
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
             R.id.item_menu_edit_undo -> {
-                undoAndRedo?.undo()
+                editorUtil?.undo()
             }
             R.id.item_menu_edit_redo -> {
-                undoAndRedo?.redo()
+                editorUtil?.redo()
             }
             R.id.item_menu_edit_preview -> {
                 previewMarkdown(isPreviewMode, item)
@@ -242,45 +183,95 @@ class EditorActivity : AppCompatActivity() {
 
     private fun previewMarkdown(preview: Boolean, item: MenuItem) {
         if (!preview) {
-            textContent.visibility = View.VISIBLE
             editContent.visibility = View.GONE
-            textTitle.visibility = View.VISIBLE
             editTitle.visibility = View.GONE
+            textTitle.apply {
+                visibility = View.VISIBLE
+                text = editTitle.text
+            }
+            textContent.apply {
+                visibility = View.VISIBLE
+                text = editContent.text
+            }
 
-//            val node = markwon?.parse(editContent.text.toString())
-//            val markdown = markwon?.render(node!!)
-//            markwon?.setParsedMarkdown(textContent, markdown!!)
-
-            menu?.findItem(item.itemId)?.apply {
+            menu!!.findItem(item.itemId).apply {
                 title = resources.getString(R.string.editar)
                 icon = ContextCompat.getDrawable(applicationContext, R.drawable.ic_round_edit)
-                icon.let {
-                    DrawableCompat.setTint(
-                        it,
-                        ContextCompat.getColor(applicationContext, R.color.appbar_color_icon)
-                    )
+            }
+//            for (i in 0 until menu!!.size){
+//
+//            }
+            for (i in menu!!) {
+                if (i != item) {
+                    i.isEnabled = false
+                    editorUtil!!.changeMenuIconColor(this, i)
                 }
             }
+            JcsUtils().hideKeyboard(this)
             isPreviewMode = true
         } else {
-            textContent.visibility = View.GONE
             editContent.visibility = View.VISIBLE
-            textTitle.visibility = View.GONE
+            editContent.requestFocus()
             editTitle.visibility = View.VISIBLE
+            textTitle.apply {
+                visibility = View.GONE
+                text = " "
+            }
+            textContent.apply {
+                visibility = View.GONE
+                text = " "
+            }
+
             menu?.findItem(item.itemId)?.apply {
                 title = resources.getString(R.string.prever)
-                icon =
-                    ContextCompat.getDrawable(applicationContext, R.drawable.ic_round_preview)
+                icon = ContextCompat.getDrawable(applicationContext, R.drawable.ic_round_preview)
+            }
+
+            for (i in menu!!) {
+                editorUtil!!.restoreMenu()
+                editorUtil!!.changeMenuIconColor(this, i)
             }
             isPreviewMode = false
         }
     }
+//    private fun previewMarkdown(preview: Boolean, item: MenuItem) {
+//        if (!preview) {
+//            textContent.visibility = View.VISIBLE
+//            editContent.visibility = View.GONE
+//            textTitle.visibility = View.VISIBLE
+//            editTitle.visibility = View.GONE
+//
+////            val node = markwon?.parse(editContent.text.toString())
+////            val markdown = markwon?.render(node!!)
+////            markwon?.setParsedMarkdown(textContent, markdown!!)
+//
+//            menu?.findItem(item.itemId)?.apply {
+//                title = resources.getString(R.string.editar)
+//                icon = ContextCompat.getDrawable(applicationContext, R.drawable.ic_round_edit)
+//            }
+//            isPreviewMode = true
+//        } else {
+//            textContent.visibility = View.GONE
+//            editContent.visibility = View.VISIBLE
+//            textTitle.visibility = View.GONE
+//            editTitle.visibility = View.VISIBLE
+//            menu?.findItem(item.itemId)?.apply {
+//                title = resources.getString(R.string.prever)
+//                icon =
+//                    ContextCompat.getDrawable(applicationContext, R.drawable.ic_round_preview)
+//            }
+//            isPreviewMode = false
+//        }
+//    }
 
     private fun saveContent() {
         if (!TextUtils.isEmpty(editTitle.text) || !TextUtils.isEmpty(editContent.text)) {
             var title = editTitle.text.toString()
             val content = editContent.text.toString()
-            if (title.isEmpty()) title = JcsUtils().getFormattedTitle(editContent)
+            if (title.isEmpty()) {
+                title = JcsUtils().getFormattedTitle(editContent)
+                editTitle.setText(title)
+            }
             val actualDate = JcsUtils().actualDate()
             val dateForOrder = JcsUtils().dateForOrder()
 
@@ -303,7 +294,7 @@ class EditorActivity : AppCompatActivity() {
                 }
             }
         }
-
+        editorUtil!!.clearHistory()
         setResult(
             Constants.RESULT_CODE_RELOAD_LIST,
             Intent().putExtra(Constants.RESULT_RELOAD_LIST_KEY, true)
