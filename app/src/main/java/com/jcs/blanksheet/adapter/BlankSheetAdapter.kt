@@ -1,7 +1,6 @@
 package com.jcs.blanksheet.adapter
 
 import android.annotation.SuppressLint
-import android.content.Context
 import android.graphics.Color
 import android.util.SparseBooleanArray
 import android.view.LayoutInflater
@@ -10,6 +9,8 @@ import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.core.content.ContextCompat
+import androidx.recyclerview.widget.DiffUtil
+import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.card.MaterialCardView
 import com.jcs.blanksheet.R
@@ -24,11 +25,8 @@ import com.jcs.blanksheet.widget.TextDrawable
  * Created by Jardson Costa on 04/04/2021.
  */
 
-class BlankSheetAdapter(
-    private val context: Context,
-    private val documents: List<Document>
-) :
-    RecyclerView.Adapter<BlankSheetAdapter.BlankSheetHolder>() {
+class BlankSheetAdapter() :
+    ListAdapter<Document, BlankSheetAdapter.BlankSheetHolder>(DOC_COMPARATOR) {
 
     private var selectedItems: SparseBooleanArray = SparseBooleanArray()
     private var listenerClick: EventClick.OnClickListener? = null
@@ -37,17 +35,17 @@ class BlankSheetAdapter(
 
     @SuppressLint("InflateParams")
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): BlankSheetHolder {
-        val view = LayoutInflater.from(context).inflate(R.layout.main_item_row_list, null, false)
+        val view: View =
+            LayoutInflater.from(parent.context).inflate(R.layout.main_item_row_list, parent, false)
         return BlankSheetHolder(view)
     }
 
     override fun onBindViewHolder(holder: BlankSheetHolder, position: Int) {
-        val document = documents[position]
-        holder.bind(document)
+        holder.bind(getItem(position))
     }
 
     override fun getItemCount(): Int {
-        return documents.size
+        return currentList.size
     }
 
     inner class BlankSheetHolder(view: View) : RecyclerView.ViewHolder(view) {
@@ -70,7 +68,7 @@ class BlankSheetAdapter(
             mImageIconTextBack.background = TextDrawable.builder()
                 .buildRoundRect(
                     "",
-                    ContextCompat.getColor(context, R.color.check_icon_background_color),
+                    ContextCompat.getColor(itemView.context, R.color.check_icon_background_color),
                     100
                 )
 
@@ -86,6 +84,7 @@ class BlankSheetAdapter(
                 }
             }
         }
+
     }
 
     private fun animateIconChecked(cardView: MaterialCardView, viewBack: View, viewFront: View) {
@@ -161,10 +160,10 @@ class BlankSheetAdapter(
     fun toggleSelection(position: Int) {
         if (selectedItems.get(position, false)) {
             selectedItems.delete(position)
-            documents[position].isChecked = false
+            getItem(position).isChecked = false
         } else {
             selectedItems.put(position, true)
-            documents[position].isChecked = true
+            getItem(position).isChecked = true
         }
         notifyItemChanged(position)
     }
@@ -193,7 +192,19 @@ class BlankSheetAdapter(
         return items
     }
 
-    fun getCheckedDocuments(): List<Document> = documents.filter {
+    fun getCheckedDocuments(): List<Document> = currentList.filter {
         it.isChecked
+    }
+
+    companion object {
+        private val DOC_COMPARATOR = object : DiffUtil.ItemCallback<Document>() {
+            override fun areItemsTheSame(oldItem: Document, newItem: Document): Boolean {
+                return oldItem.id == newItem.id
+            }
+
+            override fun areContentsTheSame(oldItem: Document, newItem: Document): Boolean {
+                return oldItem.title == newItem.title
+            }
+        }
     }
 }

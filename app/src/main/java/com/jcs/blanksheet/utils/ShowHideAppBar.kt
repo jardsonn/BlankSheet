@@ -6,6 +6,7 @@ import android.view.View
 import android.view.animation.AnimationUtils
 import android.widget.ImageButton
 import android.widget.RelativeLayout
+import android.widget.ScrollView
 import com.google.android.material.appbar.AppBarLayout
 import com.jcs.blanksheet.R
 import com.jcs.blanksheet.utils.JcsAnimation.moveContainerEditor
@@ -44,6 +45,7 @@ class ShowHideAppBar(
         // verifica se appBarLayout esta visivel
         if (appBarLayout.visibility == View.GONE) {
             appBarLayout.visibility = View.VISIBLE
+            //editContainer.scrollTo(0, editContainer.bottom)
             moveContentTop(appBarLayout, false) // appBarLayout fica visivel e desliza para baixo
             moveContentTop(btnShowHideAppBar, true) // btnShowHideAppBar desliza para cima
             moveContainerEditor(editContainer, true) // editContainer desliza para baixo
@@ -54,8 +56,8 @@ class ShowHideAppBar(
         // verifica se appBarLayout esta visivel
         if (appBarLayout.visibility == View.VISIBLE) {
             appBarLayout.visibility = View.GONE
+           // editContainer.scrollTo(0, editContainer.bottom)
             moveContentTop(appBarLayout, true) // appBarLayout desliza para cima e fica invisivel
-
             if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.LOLLIPOP_MR1) {
                 // se action mode esta atiavdo
                 if (!isActionModeActivated) {

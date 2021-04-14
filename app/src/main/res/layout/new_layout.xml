@@ -35,15 +35,12 @@
             android:fitsSystemWindows="true"
             android:transitionName="animation_container">
 
-            <RelativeLayout
-                android:id="@+id/relative_layout_edit_contaie"
+            <FrameLayout
+                android:id="@+id/title_editor_container"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_alignParentStart="true"
-                android:layout_alignParentTop="true"
-                android:layout_alignParentEnd="true"
-                android:animateLayoutChanges="true"
-                android:fitsSystemWindows="true">
+                android:layout_alignParentEnd="true">
 
                 <TextView
                     android:id="@+id/text_title_editor"
@@ -54,25 +51,6 @@
                     android:textIsSelectable="true"
                     android:visibility="invisible" />
 
-                <TextView
-                    android:id="@+id/text_content_editor"
-                    style="@style/EditorTextStyle"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_below="@id/text_title_editor"
-                    android:hint="@string/hint_editor"
-                    android:paddingBottom="100dp"
-                    android:textIsSelectable="true"
-                    android:visibility="invisible" />
-            </RelativeLayout>
-
-            <RelativeLayout
-                android:id="@+id/relative_layout_edit_containe"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:animateLayoutChanges="true"
-                android:fitsSystemWindows="true">
-
                 <EditText
                     android:id="@+id/edit_title_editor"
                     style="@style/EditorTitleStyle.Edit"
@@ -80,20 +58,39 @@
                     android:layout_height="wrap_content"
                     android:hint="@string/title"
                     android:importantForAutofill="no" />
+            </FrameLayout>
+
+            <FrameLayout
+                android:id="@+id/content_editor_container"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/title_editor_container"
+                android:layout_alignParentStart="true"
+                android:layout_alignParentEnd="true"
+                android:layout_alignParentBottom="true">
+
+                <TextView
+                    android:id="@+id/text_content_editor"
+                    style="@style/EditorTextStyle"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="@string/hint_editor"
+                    android:paddingBottom="100dp"
+                    android:textIsSelectable="true"
+                    android:visibility="invisible" />
 
                 <EditText
                     android:id="@+id/edit_content_editor"
                     style="@style/EditorTextStyle.Edit"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_below="@id/edit_title_editor"
                     android:hint="@string/hint_editor"
                     android:importantForAutofill="no"
                     android:paddingBottom="100dp">
 
                     <requestFocus />
                 </EditText>
-            </RelativeLayout>
+            </FrameLayout>
         </RelativeLayout>
     </androidx.core.widget.NestedScrollView>
 

@@ -36,7 +36,7 @@
                 android:layout_width="40dp"
                 android:layout_height="40dp"
                 android:layout_gravity="center"
-                android:contentDescription="@string/description_icon_text"
+                android:contentDescription="@string/description_image_icon"
                 android:gravity="center" />
 
             <FrameLayout
@@ -60,7 +60,7 @@
                 android:layout_width="40dp"
                 android:layout_height="40dp"
                 android:layout_gravity="center"
-                android:contentDescription="@string/description_icon_text"
+                android:contentDescription="@string/description_image_icon"
                 android:gravity="center"
                 android:scaleType="centerInside"
                 android:src="@drawable/ic_round_check"

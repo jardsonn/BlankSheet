@@ -15,12 +15,15 @@ import androidx.core.graphics.drawable.DrawableCompat
 import androidx.core.widget.addTextChangedListener
 import com.jcs.blanksheet.R
 import io.noties.markwon.*
+import io.noties.markwon.editor.MarkwonEditor
+import io.noties.markwon.editor.MarkwonEditorTextWatcher
 import io.noties.markwon.image.AsyncDrawableLoader
 import org.commonmark.ext.gfm.strikethrough.Strikethrough
 import org.commonmark.ext.gfm.strikethrough.StrikethroughExtension
 import org.commonmark.node.SoftLineBreak
 import org.commonmark.parser.Parser
 import java.util.*
+import java.util.concurrent.Executors
 
 /**
  * Created by Jardson Costa on 23/03/2021.
@@ -29,7 +32,8 @@ import java.util.*
 class EditorUtil(private val editTitle: EditText, private val editContent: EditText) {
     private val mEditorHistory: EditorHistory
 
-    private val mEditTextChangeListener: EditTextChangeListener
+   private val mEditTextChangeListener: EditTextChangeListener
+   // private val mEditTextChangeListener: MarkwonEditorTextWatcher
 
     private var mIsUndoOrRedo = false
 
@@ -133,25 +137,14 @@ class EditorUtil(private val editTitle: EditText, private val editContent: EditT
     }
 
     fun restoreMenu() {
-        menuItemSave!!.isEnabled = editTitle.text.isNotEmpty() && editContent.text.isNotEmpty() || changedText
+        menuItemSave!!.isEnabled =
+            editTitle.text.isNotEmpty() || editContent.text.isNotEmpty() && changedText
         menuItemRedo!!.isEnabled = availableToRedo()
         menuItemUndo!!.isEnabled = availableToUndo()
     }
 
     fun unsavedContent(): Boolean {
         return changedText
-    }
-
-    fun makeEditableText(isEditable: Boolean) {
-        if (isEditable) {
-            editTitle.inputType = InputType.TYPE_NULL
-            editContent.inputType = InputType.TYPE_NULL
-            editTitle.setTextIsSelectable(true)
-            editContent.setTextIsSelectable(true)
-        } else {
-            editTitle.inputType = InputType.TYPE_CLASS_TEXT
-            editContent.inputType = InputType.TYPE_CLASS_TEXT
-        }
     }
 
     fun setMaxHistorySize(maxHistorySize: Int) {
@@ -332,6 +325,7 @@ class EditorUtil(private val editTitle: EditText, private val editContent: EditT
         override fun afterTextChanged(s: Editable) {}
     }
 
+
     companion object {
         private const val HASH_KEY = ".hash"
         private const val MAX_SIZE_KEY = ".maxSize"
@@ -343,9 +337,6 @@ class EditorUtil(private val editTitle: EditText, private val editContent: EditT
     }
 
     init {
-        mEditorHistory = EditorHistory()
-        mEditTextChangeListener = EditTextChangeListener()
-        editContent.addTextChangedListener(mEditTextChangeListener)
 
         markwon = Markwon.builder(editContent.context)
             .usePlugin(object : AbstractMarkwonPlugin() {
@@ -381,5 +372,14 @@ class EditorUtil(private val editTitle: EditText, private val editContent: EditT
 //                )
 //            })
             .build()
+
+        mEditorHistory = EditorHistory()
+         mEditTextChangeListener = EditTextChangeListener()
+//        mEditTextChangeListener = MarkwonEditorTextWatcher.withPreRender(
+//            MarkwonEditor.create(markwon!!),
+//            Executors.newCachedThreadPool(),
+//            editContent
+//        )
+        editContent.addTextChangedListener(mEditTextChangeListener)
     }
 }

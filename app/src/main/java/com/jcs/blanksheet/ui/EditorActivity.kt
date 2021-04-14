@@ -5,31 +5,37 @@ import android.content.res.Configuration
 import android.graphics.Color
 import android.os.Build
 import android.os.Bundle
+import android.os.Looper
 import android.text.TextUtils
-import android.util.Log
 import android.view.ActionMode
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
-import android.widget.*
+import android.widget.EditText
+import android.widget.ImageButton
+import android.widget.RelativeLayout
+import android.widget.TextView
+import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
 import androidx.core.content.ContextCompat
+import androidx.core.os.HandlerCompat
 import androidx.core.view.isVisible
 import androidx.core.view.iterator
-import androidx.core.widget.addTextChangedListener
-import androidx.lifecycle.lifecycleScope
+import androidx.core.widget.NestedScrollView
 import com.google.android.material.appbar.AppBarLayout
+import com.jcs.blanksheet.DocumentApplication
 import com.jcs.blanksheet.R
-import com.jcs.blanksheet.db.DocumentDao
-import com.jcs.blanksheet.db.DocumentDatabase
 import com.jcs.blanksheet.model.Document
-import com.jcs.blanksheet.utils.*
+import com.jcs.blanksheet.utils.Constants
+import com.jcs.blanksheet.utils.EditorUtil
 import com.jcs.blanksheet.utils.JcsAnimation.moveContainerEditor
 import com.jcs.blanksheet.utils.JcsAnimation.moveContentTop
+import com.jcs.blanksheet.utils.JcsUtils
+import com.jcs.blanksheet.utils.ShowHideAppBar
+import com.jcs.blanksheet.viewmodel.DocumentViewModel
+import com.mikhaellopez.circularprogressbar.CircularProgressBar
 import kotlinx.coroutines.InternalCoroutinesApi
-import kotlinx.coroutines.launch
-import java.util.*
 
 
 /**
@@ -46,7 +52,9 @@ class EditorActivity : AppCompatActivity() {
 
     private lateinit var editContent: EditText
 
-    private lateinit var scrollViewEditor: ScrollView
+    private lateinit var scrollViewEditor: NestedScrollView
+
+    private lateinit var progressLoadText: CircularProgressBar
 
     private lateinit var rlEditContainer: RelativeLayout
 
@@ -56,7 +64,7 @@ class EditorActivity : AppCompatActivity() {
 
     private lateinit var shadowActionMode: View
 
-    private lateinit var documentDao: DocumentDao
+    // private lateinit var documentDao: DocumentDao
 
     private var documentTemp: Document? = null
 
@@ -70,17 +78,22 @@ class EditorActivity : AppCompatActivity() {
 
     private var isPreviewMode = false
 
+    private val viewModel: DocumentViewModel by viewModels {
+        DocumentViewModel.DocViewModelFactory((application as DocumentApplication).repository)
+    }
+
     @InternalCoroutinesApi
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_editor)
 
         rlEditContainer = findViewById(R.id.relative_layout_edit_container)
-        editTitle = findViewById(R.id.edit_title)
-        textTitle = findViewById(R.id.text_title_from_editor)
-        editContent = findViewById(R.id.edit_content)
-        textContent = findViewById(R.id.text_content_from_editor)
+        editTitle = findViewById(R.id.edit_title_editor)
+        textTitle = findViewById(R.id.text_title_editor)
+        editContent = findViewById(R.id.edit_content_editor)
+        textContent = findViewById(R.id.text_content_editor)
         scrollViewEditor = findViewById(R.id.scroll_view_editor)
+        progressLoadText = findViewById(R.id.progress_load_text)
         shadowActionMode = findViewById(R.id.view_shadow_action_mode)
 
         btnShowAppBar = findViewById(R.id.btn_show_appbar)
@@ -92,22 +105,32 @@ class EditorActivity : AppCompatActivity() {
         setSupportActionBar(toolbar)
         supportActionBar!!.setDisplayShowTitleEnabled(false)
 
-        lifecycleScope.launch {
-            try {
-                documentDao = DocumentDatabase.getInstance(this@EditorActivity).documentDao()
-            } catch (e: Exception) {
-                Log.e("Room database error: ", e.stackTraceToString())
-            }
+
+        intent.extras?.let {
+            val id = it.getInt(Constants.DOCUMENT_ID, 0)
+            viewModel.getDocumentById(id).observe(this, { doc ->
+                documentTemp = doc
+                editTitle.setText(doc.title)
+                editContent.setText(doc.content)
+            })
         }
 
-        if (intent.extras != null) {
-            val id = intent.extras!!.getInt(Constants.DOCUMENT_ID, 0)
-            documentTemp = documentDao.getDocumentById(id)
-            documentTemp?.let {
-                editTitle.setText(it.title)
-                editContent.setText(it.content)
-            }
-        }
+
+//        lifecycleScope.launch {
+//        //    progressLoadText.visibility = View.VISIBLE
+//            documentDao = DocumentDatabase.getDatabase(this@EditorActivity, this).documentDao()
+//            if (intent.extras != null) {
+//                val id = intent.extras?.getInt(Constants.DOCUMENT_ID, 0)
+//            //    withContext(Dispatchers.Main){
+//                    documentDao.getDocumentById(id!!).collect { doc ->
+//                        documentTemp = doc
+//                        editTitle.setText(doc.title)
+//                        editContent.setText(doc.content)
+//                    }
+//            //    progressLoadText.visibility = View.GONE
+//             //   }
+//            }
+//        }
 
         showHideAppBar = ShowHideAppBar(
             appBarLayout,
@@ -121,13 +144,16 @@ class EditorActivity : AppCompatActivity() {
 
         editorUtil = EditorUtil(editTitle, editContent)
 
-        editContent.addTextChangedListener { s ->
-            // textContent.text = if (s!!.endsWith(" ")) s else s.insert(s.length, " ")
-        }
+//        HandlerCompat.createAsync(Looper.getMainLooper())
+//            .post {
+//                editTitle.addTextChangedListener{ s ->
+//                    textTitle.text = s
+//                }
+//                 editContent.addTextChangedListener{ s ->
+//                    textContent.text = s
+//                }
+//            }
 
-        editTitle.addTextChangedListener { s ->
-            //  textTitle.text = if (s!!.endsWith(" ")) s else s.insert(s.length, " ")
-        }
     }
 
     override fun onConfigurationChanged(newConfig: Configuration) {
@@ -183,36 +209,46 @@ class EditorActivity : AppCompatActivity() {
 
     private fun previewMarkdown(preview: Boolean, item: MenuItem) {
         if (!preview) {
-            editContent.visibility = View.GONE
-            editTitle.visibility = View.GONE
-            textTitle.apply {
-                visibility = View.VISIBLE
-                text = editTitle.text
-            }
-            textContent.apply {
-                visibility = View.VISIBLE
-                text = editContent.text
+            JcsUtils().hideKeyboard(this)
+            progressLoadText.visibility = View.VISIBLE
+
+            HandlerCompat.createAsync(Looper.getMainLooper()).post {
+                editContent.visibility = View.INVISIBLE
+                editTitle.visibility = View.INVISIBLE
+                editTitle.clearFocus()
+                editContent.requestFocus()
+                textTitle.clearFocus()
+                textContent.requestFocus()
+
+                textTitle.setText(editTitle.text, TextView.BufferType.EDITABLE)
+                textContent.setText(editContent.text, TextView.BufferType.EDITABLE)
+
+                runOnUiThread {
+                    textTitle.visibility = View.VISIBLE
+                    textContent.visibility = View.VISIBLE
+                    progressLoadText.visibility = View.GONE
+
+                }
             }
 
             menu!!.findItem(item.itemId).apply {
-                title = resources.getString(R.string.editar)
+                title = resources.getString(R.string.edit_container)
                 icon = ContextCompat.getDrawable(applicationContext, R.drawable.ic_round_edit)
             }
-//            for (i in 0 until menu!!.size){
-//
-//            }
+
             for (i in menu!!) {
                 if (i != item) {
                     i.isEnabled = false
                     editorUtil!!.changeMenuIconColor(this, i)
                 }
             }
-            JcsUtils().hideKeyboard(this)
             isPreviewMode = true
         } else {
             editContent.visibility = View.VISIBLE
-            editContent.requestFocus()
             editTitle.visibility = View.VISIBLE
+            editTitle.clearFocus()
+            editContent.requestFocus()
+
             textTitle.apply {
                 visibility = View.GONE
                 text = " "
@@ -223,7 +259,7 @@ class EditorActivity : AppCompatActivity() {
             }
 
             menu?.findItem(item.itemId)?.apply {
-                title = resources.getString(R.string.prever)
+                title = resources.getString(R.string.preview)
                 icon = ContextCompat.getDrawable(applicationContext, R.drawable.ic_round_preview)
             }
 
@@ -234,35 +270,6 @@ class EditorActivity : AppCompatActivity() {
             isPreviewMode = false
         }
     }
-//    private fun previewMarkdown(preview: Boolean, item: MenuItem) {
-//        if (!preview) {
-//            textContent.visibility = View.VISIBLE
-//            editContent.visibility = View.GONE
-//            textTitle.visibility = View.VISIBLE
-//            editTitle.visibility = View.GONE
-//
-////            val node = markwon?.parse(editContent.text.toString())
-////            val markdown = markwon?.render(node!!)
-////            markwon?.setParsedMarkdown(textContent, markdown!!)
-//
-//            menu?.findItem(item.itemId)?.apply {
-//                title = resources.getString(R.string.editar)
-//                icon = ContextCompat.getDrawable(applicationContext, R.drawable.ic_round_edit)
-//            }
-//            isPreviewMode = true
-//        } else {
-//            textContent.visibility = View.GONE
-//            editContent.visibility = View.VISIBLE
-//            textTitle.visibility = View.GONE
-//            editTitle.visibility = View.VISIBLE
-//            menu?.findItem(item.itemId)?.apply {
-//                title = resources.getString(R.string.prever)
-//                icon =
-//                    ContextCompat.getDrawable(applicationContext, R.drawable.ic_round_preview)
-//            }
-//            isPreviewMode = false
-//        }
-//    }
 
     private fun saveContent() {
         if (!TextUtils.isEmpty(editTitle.text) || !TextUtils.isEmpty(editContent.text)) {
@@ -283,16 +290,17 @@ class EditorActivity : AppCompatActivity() {
                     actualDate,
                     dateForOrder
                 )
-                documentDao.saveDocument(documentTemp!!)
+                viewModel.saveDocument(documentTemp!!)
             } else {
                 documentTemp?.let {
                     it.title = title
                     it.content = content
                     it.date = actualDate
                     it.dateForOrder = dateForOrder
-                    documentDao.updateDocument(it)
+                    viewModel.updateDocument(it)
                 }
             }
+
         }
         editorUtil!!.clearHistory()
         setResult(

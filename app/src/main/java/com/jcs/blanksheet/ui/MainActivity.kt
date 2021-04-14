@@ -1,6 +1,9 @@
 package com.jcs.blanksheet.ui
 
+//import org.koin.androidx.viewmodel.compat.SharedViewModelCompat.sharedViewModel
+
 import android.content.Intent
+import android.content.SharedPreferences
 import android.graphics.Typeface
 import android.os.Build
 import android.os.Bundle
@@ -8,10 +11,10 @@ import android.text.Spannable
 import android.text.SpannableString
 import android.text.style.ForegroundColorSpan
 import android.text.style.StyleSpan
-import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import android.widget.TextView
+import androidx.activity.viewModels
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.view.ActionMode
@@ -19,24 +22,25 @@ import androidx.appcompat.widget.Toolbar
 import androidx.cardview.widget.CardView
 import androidx.core.app.ActivityOptionsCompat
 import androidx.core.content.ContextCompat
-import androidx.lifecycle.lifecycleScope
+import androidx.preference.PreferenceManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.card.MaterialCardView
 import com.google.android.material.floatingactionbutton.FloatingActionButton
+import com.jcs.blanksheet.DocumentApplication
 import com.jcs.blanksheet.R
 import com.jcs.blanksheet.adapter.BlankSheetAdapter
 import com.jcs.blanksheet.callbacks.EventClick
-import com.jcs.blanksheet.db.DocumentDao
-import com.jcs.blanksheet.db.DocumentDatabase
 import com.jcs.blanksheet.dialog.BottomSortDialog
+import com.jcs.blanksheet.dialog.sharedpreference.SharedPreferenceLiveData.SharedPreferenceStringLiveData
 import com.jcs.blanksheet.model.Document
 import com.jcs.blanksheet.utils.Constants
 import com.jcs.blanksheet.utils.JcsUtils
+import com.jcs.blanksheet.utils.Sort
+import com.jcs.blanksheet.viewmodel.DocumentViewModel
 import com.jcs.blanksheet.widget.JcsSearchView
 import com.jcs.blanksheet.widget.ToastUndo
-import kotlinx.coroutines.InternalCoroutinesApi
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.*
 import java.util.*
 import kotlin.collections.ArrayList
 
@@ -51,15 +55,18 @@ class MainActivity : AppCompatActivity(), EventClick.OnClickListener,
     private lateinit var searchView: JcsSearchView
 
     private lateinit var adapter: BlankSheetAdapter
-    private lateinit var dao: DocumentDao
-    private var listDoc = ArrayList<Document>()
+    //  private lateinit var dao: DocumentDao
+    // private var listDoc = ArrayList<Document>()
 
     private var actionMode: ActionMode? = null
 
     private var reloadList: Boolean = false
 
+    private val viewModel: DocumentViewModel by viewModels {
+        DocumentViewModel.DocViewModelFactory((application as DocumentApplication).repository)
+    }
+
     @RequiresApi(Build.VERSION_CODES.M)
-    @InternalCoroutinesApi
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
@@ -71,8 +78,13 @@ class MainActivity : AppCompatActivity(), EventClick.OnClickListener,
         cardView = findViewById(R.id.card_view_main)
         setUpToolbar()
 
-        recyclerView.setHasFixedSize(true)
+        //recyclerView.setHasFixedSize(true)
+        adapter = BlankSheetAdapter()
+        recyclerView.adapter = adapter
         recyclerView.layoutManager = LinearLayoutManager(this)
+
+        adapter.setOnClickListener(this)
+        adapter.setOnLongClickListener(this)
 
         fabAdd.setOnClickListener {
             val i = Intent(this, EditorActivity::class.java)
@@ -86,16 +98,28 @@ class MainActivity : AppCompatActivity(), EventClick.OnClickListener,
                 fabAdd.hide()
         }
 
-        lifecycleScope.launch {
-            try {
-                dao = DocumentDatabase.getInstance(this@MainActivity).documentDao()
-            } catch (e: Exception) {
-                Log.e("Room database error: ", e.stackTraceToString())
+        val preferences: SharedPreferences = PreferenceManager.getDefaultSharedPreferences(this)
+        val sharedPreferenceStringLiveData = SharedPreferenceStringLiveData(
+            preferences,
+            Constants.SORT_BY,
+            Sort.get(0)!!
+        )
+
+        sharedPreferenceStringLiveData.getString(Constants.SORT_BY, Sort.get(0)!!)
+            .observe(this) { sortBy ->
+                loadList(sortBy)
             }
-        }
 
         setSearchView()
-        loadDocuments()
+    }
+
+    private fun loadList(sortBy: String) {
+        println(sortBy)
+        viewModel.getAllDocuments(sortBy).observe(this) { docs ->
+            docs.let {
+                adapter.submitList(it)
+            }
+        }
     }
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
@@ -118,7 +142,6 @@ class MainActivity : AppCompatActivity(), EventClick.OnClickListener,
                 BottomSortDialog(this).apply {
                     setOnOptionsChangeListener {
                         dismiss()
-                        loadDocuments()
                     }
                     show()
                 }
@@ -140,7 +163,7 @@ class MainActivity : AppCompatActivity(), EventClick.OnClickListener,
     override fun onResume() {
         super.onResume()
         if (reloadList) {
-            loadDocuments()
+            //    loadDocuments()
             reloadList = false
         }
     }
@@ -182,7 +205,7 @@ class MainActivity : AppCompatActivity(), EventClick.OnClickListener,
         override fun onActionItemClicked(mode: ActionMode?, item: MenuItem?): Boolean {
             when (item?.itemId) {
                 R.id.item_menu_selection_delete -> {
-                    onDeleteDocument()
+                    deleteDocument()
                 }
             }
             actionMode?.finish()
@@ -219,11 +242,11 @@ class MainActivity : AppCompatActivity(), EventClick.OnClickListener,
 
                     val textSearch = newText.decapitalize(Locale.ROOT)
                     val listSearch = ArrayList<Document>()
-                    for (i in listDoc.indices) {
-                        if (listDoc[i].title.decapitalize(Locale.ROOT).contains(textSearch)) {
-                            listSearch.add(listDoc[i])
+                    for (i in adapter.currentList) {
+                        if (i.title.decapitalize(Locale.ROOT).contains(textSearch)) {
+                            listSearch.add(i)
                         }
-                        adapter = BlankSheetAdapter(context, listSearch)
+                        //  adapter = BlankSheetAdapter(context, listSearch)
                         adapter.setOnClickListener { position, document, cardView ->
                             val intentEditor = Intent(context, EditorActivity::class.java)
                             val options = ActivityOptionsCompat.makeSceneTransitionAnimation(
@@ -242,7 +265,7 @@ class MainActivity : AppCompatActivity(), EventClick.OnClickListener,
                 override fun onQueryTextSubmit(query: String): Boolean {
                     clearFocus()
                     closeSearch()
-                    loadDocuments()
+                    //       loadDocuments()
                     return true
                 }
             })
@@ -254,41 +277,64 @@ class MainActivity : AppCompatActivity(), EventClick.OnClickListener,
 
                 override fun onSearchViewClosed() {
                     fabAdd.show()
-                    loadDocuments()
+                    //    loadDocuments()
                 }
             })
         }
     }
 
-    private fun loadDocuments() {
-        listDoc.apply {
-            clear()
-            addAll(dao.allDocuments)
-            JcsUtils().onSortDocuments(this@MainActivity, this)
+    private fun deleteDocument() {
+        val checkedDocument: List<Document> = adapter.getCheckedDocuments()
+        viewModel.deleteDocument(*checkedDocument.toTypedArray())
+        ToastUndo(this, fabAdd).apply {
+            setOnUndoClickListener {
+                for (i in checkedDocument) {
+                    viewModel.saveDocument(i)
+                    dismiss()
+                }
+            }
+            show()
         }
-        adapter = BlankSheetAdapter(this, listDoc)
-        adapter.setOnClickListener(this)
-        adapter.setOnLongClickListener(this)
-        recyclerView.adapter = adapter
     }
 
-    private fun onDeleteDocument() {
-        val checkedDocument: List<Document> = adapter.getCheckedDocuments()
-        if (checkedDocument.isNotEmpty()) {
-            dao.deleteDocument(*checkedDocument.toTypedArray())
-            loadDocuments()
-            ToastUndo(this, fabAdd).apply {
-                setOnUndoClickListener {
-                    for (document in checkedDocument) {
-                        dao.saveDocument(document)
-                        loadDocuments()
-                        it.dismiss()
-                    }
-                }
-                this.show()
-            }
-        }
-    }
+//    private fun onDeleteDocument() {
+//        val checkedDocument: List<Document> = adapter.getCheckedDocuments()
+//        val toastUndo = ToastUndo(this, fabAdd)
+//
+//        lifecycleScope.launch {
+//            withContext(Dispatchers.IO) {
+//                dao.deleteDocument(*checkedDocument.toTypedArray())
+//
+//                toastUndo.setOnUndoClickListener {
+//                    // dao.saveDocument(*checkedDocument.toTypedArray())
+////                    for (doc in checkedDocument) {
+////
+////                       // this.launch { dao.saveDocument(doc) }
+////                    }
+//                }
+//            }
+//            runOnUiThread {
+//                toastUndo.show()
+//                //  loadDocuments()
+//            }
+//        }
+
+
+//        if (checkedDocument.isNotEmpty()) {
+//            dao.deleteDocument(*checkedDocument.toTypedArray())
+//            loadDocuments()
+//            ToastUndo(this, fabAdd).apply {
+//                setOnUndoClickListener {
+//                    for (document in checkedDocument) {
+//                        dao.saveDocument(document)
+//                        loadDocuments()
+//                        it.dismiss()
+//                    }
+//                }
+//                this.show()
+//            }
+//        }
+    //   }
 
     private fun setUpToolbar() {
         setSupportActionBar(toolbar)

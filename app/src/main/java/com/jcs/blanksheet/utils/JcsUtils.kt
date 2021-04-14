@@ -10,10 +10,10 @@ import android.content.res.TypedArray
 import android.graphics.drawable.GradientDrawable
 import android.net.Uri
 import android.os.Build
+import android.view.MotionEvent
 import android.view.View
 import android.view.inputmethod.InputMethodManager
 import android.widget.EditText
-import android.widget.TextView
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
@@ -68,7 +68,11 @@ class JcsUtils {
      *
      * @return String
      **/
-    fun dateForOrder(): String = System.currentTimeMillis().toString()
+    // fun dateForOrder(): String = System.currentTimeMillis().toString()
+    fun dateForOrder(): String {
+        return SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS", Locale.getDefault()).format(Date())
+            .toString()
+    }
 
     /**
      * Obtem a primeira letra do título
@@ -174,10 +178,29 @@ class JcsUtils {
         }
     }
 
+//     fun hideKeyboard(view: View) {
+//        val imm = view.context.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+//        imm.hideSoftInputFromWindow(view.windowToken, 0)
+//    }
+
+    fun View.showKeyboard() {
+        val imm = context.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+        imm.toggleSoftInput(InputMethodManager.SHOW_FORCED, 0)
+    }
+
     fun hideKeyboard(activity: AppCompatActivity) {
         (activity.getSystemService(Activity.INPUT_METHOD_SERVICE) as InputMethodManager)
             .hideSoftInputFromWindow(activity.currentFocus!!.windowToken, 0)
     }
+
+    fun handleTouchOnView(view: View, event: MotionEvent) {
+        view.parent.requestDisallowInterceptTouchEvent(true)
+        when (event.action and MotionEvent.ACTION_MASK) {
+            MotionEvent.ACTION_UP -> view.parent.parent
+                .requestDisallowInterceptTouchEvent(false)
+        }
+    }
+
 //
 //    fun openFile(activity: AppCompatActivity?, isTitle: Boolean): String {
 //        val uri = activity!!.intent.data

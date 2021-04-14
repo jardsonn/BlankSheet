@@ -2,6 +2,7 @@ package com.jcs.blanksheet.db
 
 import androidx.room.*
 import com.jcs.blanksheet.model.Document
+import kotlinx.coroutines.flow.Flow
 
 /**
  * Created by Jardson Costa on 22/03/2021.
@@ -16,7 +17,7 @@ interface DocumentDao {
      * @param document
      **/
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    fun saveDocument(document: Document): Long
+    suspend fun saveDocument(document: Document): Long
 
     /**
      * Atualizar o documento
@@ -24,7 +25,7 @@ interface DocumentDao {
      * @param document
      **/
     @Update
-    fun updateDocument(document: Document)
+    suspend fun updateDocument(document: Document)
 
     /**
      * Excluir o documento
@@ -32,16 +33,15 @@ interface DocumentDao {
      * @param document
      **/
     @Delete
-    fun deleteDocument(vararg document: Document)
+    suspend fun deleteDocument(vararg document: Document)
 
     /**
-     * Listar todos os documentos do banco de dados
+     * Exclui o documento de acordo com seu id
+     *
+     * @param documentId
      **/
-    @get:Query("SELECT * FROM main_table")
-    val allDocuments: List<Document>
-
-//    @Query("SELECT * FROM main_table")
-//    fun allDocuments(): Flow<List<Document>>
+    @Query("DELETE FROM main_table WHERE id = :documentId")
+    suspend fun deleteDocumentById(documentId: Int)
 
     /**
      * Obtem o documento de acordo com seu id
@@ -50,18 +50,41 @@ interface DocumentDao {
      * @return JotterMarkDocument
      **/
     @Query("SELECT * FROM main_table WHERE id = :documentId")
-    fun getDocumentById(documentId: Int): Document
-
-// @Query("SELECT * FROM main_table WHERE id = :documentId")
-//    fun getDocumentById(documentId: Int): Flow<Document>
-
-
+    fun getDocumentById(documentId: Int): Flow<Document>
 
     /**
-     * Exclui o documento de acordo com seu id
+     * Lista todos os documentos do banco de dados
      *
-     * @param documentId
      **/
-    @Query("DELETE FROM main_table WHERE id = :documentId")
-    fun deleteDocumentById(documentId: Int)
+    @Query("SELECT * FROM main_table")
+    fun allDocuments(): Flow<List<Document>>
+
+    /**
+     * Lista todos os documentos do banco de dados ordenda por titulo.
+     * ORDENAR de A a Z
+     **/
+    @Query("SELECT * FROM main_table ORDER BY title ASC")
+    fun getDocumentByNameAsc(): Flow<List<Document>>
+
+    /**
+     * Lista todos os documentos do banco de dados ordenda por titulo.
+     * ORDENAR de Z a A
+     **/
+    @Query("SELECT * FROM main_table ORDER BY title DESC")
+    fun getDocumentByNameDesc(): Flow<List<Document>>
+
+    /**
+     * Lista todos os documentos do banco de dados ordenda por data.
+     * ORDENAR do mais recente ao mais antigo
+     **/
+    @Query("SELECT * FROM main_table ORDER BY dateForOrder ASC")
+    fun getDocumentByDateAsc(): Flow<List<Document>>
+
+    /**
+     * Lista todos os documentos do banco de dados ordenda por data.
+     * ORDENAR do mais antigo ao mais recente
+     **/
+    @Query("SELECT * FROM main_table ORDER BY dateForOrder DESC")
+    fun getDocumentByDateDesc(): Flow<List<Document>>
+
 }
