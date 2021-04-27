@@ -6,12 +6,12 @@ import android.os.Bundle
 import android.widget.RadioButton
 import android.widget.RadioGroup
 import androidx.appcompat.app.AppCompatActivity
-import androidx.lifecycle.Observer
 import androidx.preference.PreferenceManager
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.jcs.blanksheet.R
-import com.jcs.blanksheet.dialog.sharedpreference.SharedPreferenceLiveData
+import com.jcs.blanksheet.dialog.sharedpreference.SavedSortingData
 import com.jcs.blanksheet.utils.Constants
+import com.jcs.blanksheet.utils.Constants.BY_NAME_AZ
 import com.jcs.blanksheet.utils.Sort
 
 /**
@@ -29,7 +29,7 @@ class BottomSortDialog(private var act: AppCompatActivity) : BottomSheetDialog(a
 //    private var mPreferences: SharedPreferences? = null
 //    private var mEditor: SharedPreferences.Editor? = null
 
-    private var mPreference: SharedPreferenceLiveData.SharedPreferenceStringLiveData? = null
+    private var mPreference: SavedSortingData.SavedSortingDataLiveData? = null
     private var mPreferenceManager: SharedPreferences? = null
 
     private var listener: OnOptionsChangeListener? = null
@@ -54,30 +54,30 @@ class BottomSortDialog(private var act: AppCompatActivity) : BottomSheetDialog(a
 
 //        mPreferences = context.getSharedPreferences(Constants.RADIO_BUTTON, Context.MODE_PRIVATE)
 //        mEditor = this.mPreferences?.edit()
-      //  mPreferenceManager = PreferenceManager(context)
-     //   mPreference = mPreferenceManager?.getSharedPrefs()
+        //  mPreferenceManager = PreferenceManager(context)
+        //   mPreference = mPreferenceManager?.getSharedPrefs()
 
         mPreferenceManager = PreferenceManager.getDefaultSharedPreferences(context)
-       mPreference = SharedPreferenceLiveData.SharedPreferenceStringLiveData(
-           mPreferenceManager!!,
-                Constants.SORT_BY,
-                Sort.get(0)!!
-            )
+        mPreference = SavedSortingData.SavedSortingDataLiveData(
+            mPreferenceManager!!,
+            Constants.SORT_BY,
+            Sort.get(0)
+        )
 
         mPreference?.let { it ->
-            it.getString(Constants.SORT_BY, Sort.get(0)!!)
+            it.getOrder(Constants.SORT_BY, Sort.get(BY_NAME_AZ))
                 .observe(act, { sortBy ->
                     when (sortBy) {
                         Sort.get(0) -> {
                             rbByNameAZ.isChecked = true
                         }
-                        Sort.get(1)!! -> {
+                        Sort.get(1) -> {
                             rbByNameZA.isChecked = true
                         }
-                        Sort.get(2)!! -> {
+                        Sort.get(2) -> {
                             rbByDateRecent.isChecked = true
                         }
-                        Sort.get(3)!! -> {
+                        Sort.get(3) -> {
                             rbByDateOld.isChecked = true
                         }
                     }

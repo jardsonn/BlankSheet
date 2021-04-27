@@ -1,9 +1,7 @@
 package com.jcs.blanksheet.utils
 
 import android.content.Context
-import com.jcs.blanksheet.model.Document
-import kotlinx.coroutines.*
-import kotlinx.coroutines.flow.Flow
+import com.jcs.blanksheet.entity.Document
 
 /**
  * Created by Jardson Costa on 13/04/2021.

@@ -16,7 +16,7 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.BlankSheet">
 
-        <activity android:name=".ui.MainActivity">
+        <activity android:name=".ui.activity.MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -24,7 +24,7 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".ui.EditorActivity"
+            android:name=".ui.activity.EditorActivity"
             android:configChanges="keyboard|keyboardHidden|orientation|screenSize"
             android:theme="@style/Theme.BlankSheet"
             android:windowSoftInputMode="adjustResize|stateVisible" />

@@ -39,12 +39,6 @@
                 android:contentDescription="@string/description_image_icon"
                 android:gravity="center" />
 
-            <FrameLayout
-                android:layout_width="40dp"
-                android:layout_height="40dp"
-                android:layout_gravity="center"
-                android:gravity="center">
-
                 <TextView
                     android:id="@+id/text_icon"
                     android:layout_width="wrap_content"
@@ -53,20 +47,18 @@
                     android:textSize="20sp"
                     android:textStyle="bold"
                     tools:text="T" />
+
+                <ImageView
+                    android:id="@+id/image_icon_checked"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:contentDescription="@string/description_image_icon"
+                    android:gravity="center"
+                    android:scaleType="centerInside"
+                    android:src="@drawable/ic_round_check"
+                    android:visibility="gone" />
             </FrameLayout>
-
-            <ImageView
-                android:id="@+id/image_icon_checked"
-                android:layout_width="40dp"
-                android:layout_height="40dp"
-                android:layout_gravity="center"
-                android:contentDescription="@string/description_image_icon"
-                android:gravity="center"
-                android:scaleType="centerInside"
-                android:src="@drawable/ic_round_check"
-                android:visibility="gone" />
-
-        </FrameLayout>
 
         <LinearLayout
             android:id="@+id/linearlayout_list_item"

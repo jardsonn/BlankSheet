@@ -1,5 +1,6 @@
 package com.jcs.blanksheet.utils
 
+import com.jcs.blanksheet.entity.Document
 import kotlin.math.abs
 
 /**
@@ -7,14 +8,14 @@ import kotlin.math.abs
  */
 class ColorGenerator private constructor(colorList: List<Int>) {
     private val mColors: List<Int> = colorList
-
-    fun getColor(key: Any): Int {
-        return mColors[abs(key.hashCode()) % mColors.size]
+    
+    fun getColor(doc: Document): Int {
+        return mColors[abs(doc.hashCode()) % mColors.size]
     }
-
+    
     companion object {
         var MATERIAL: ColorGenerator
-
+        
         init {
             MATERIAL = create(
                listOf(
@@ -183,7 +184,7 @@ class ColorGenerator private constructor(colorList: List<Int>) {
                )
             )
         }
-
+        
         private fun create(colorList: List<Int>): ColorGenerator {
             return ColorGenerator(colorList)
         }

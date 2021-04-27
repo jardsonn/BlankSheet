@@ -8,14 +8,14 @@ import androidx.lifecycle.LiveData
  * Created by Jardson Costa on 13/04/2021.
  */
 
-abstract class SharedPreferenceLiveData<T>(
+abstract class SavedSortingData<T>(
     val prefs: SharedPreferences,
-    val key: String,
-    val defValue: T
+    private val key: String,
+    private val defValue: T
 ) : LiveData<T>() {
 
     private val preferenceChangeListener =
-        SharedPreferences.OnSharedPreferenceChangeListener { sharedPreferences, mKey ->
+        SharedPreferences.OnSharedPreferenceChangeListener { _ , mKey ->
             if (key == mKey) {
                 value = getValueFromPreferences(key, defValue = defValue)
             }
@@ -35,19 +35,19 @@ abstract class SharedPreferenceLiveData<T>(
     }
 
 
-    open fun getString(
+    open fun getOrder(
         key: String,
         defaultValue: String
-    ): SharedPreferenceStringLiveData {
-        return SharedPreferenceStringLiveData(prefs, key, defaultValue)
+    ): SavedSortingDataLiveData {
+        return SavedSortingDataLiveData(prefs, key, defaultValue)
     }
 
 
-    class SharedPreferenceStringLiveData(
+    class SavedSortingDataLiveData(
         pref: SharedPreferences,
         key: String, defValue: String
     ) :
-        SharedPreferenceLiveData<String>(pref, key, defValue) {
+        SavedSortingData<String>(pref, key, defValue) {
         override fun getValueFromPreferences(key: String?, defValue: String): String {
             return prefs.getString(key, defValue)!!
         }

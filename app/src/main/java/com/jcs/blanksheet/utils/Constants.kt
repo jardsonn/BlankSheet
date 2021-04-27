@@ -17,9 +17,6 @@ object Constants {
     const val RESULT_RELOAD_LIST_KEY = "reload_list"
 
     const val DOCUMENT_ID = "doc_id"
-    const val JOTTER_DATA = "jotter_data"
-    const val TITLE_KEY = "title"
-    const val CONTENT_KEY = "content"
     const val ANIMATION_CONTAINER_KEY = "animation_container"
 
     const val SORT_BY = "sort_by"
@@ -29,8 +26,10 @@ object Constants {
     const val SORT_BY_DATE_RECENT = "sort_by_date_recent"
     const val SORT_BY_DATE_OLDEST = "sort_by_date_oldest"
 
-    const val VIEW_GRID = 1
-    const val VIEW_LIST = 2
+    const val BY_NAME_AZ = 0
+    const val BY_NAME_ZA = 1
+    const val BY_DATE_RECENT = 2
+    const val BY_DATE_OLDEST = 3
 
     const val REQUEST_EXTERNAL_STORAGE = 1
     val PERMISSIONS_STORAGE = arrayOf(

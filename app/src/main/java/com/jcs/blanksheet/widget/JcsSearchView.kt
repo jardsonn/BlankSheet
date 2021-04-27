@@ -2,6 +2,7 @@ package com.jcs.blanksheet.widget
 
 import android.animation.Animator
 import android.animation.AnimatorListenerAdapter
+import android.annotation.SuppressLint
 import android.content.Context
 import android.content.res.Configuration
 import android.graphics.Color
@@ -102,10 +103,10 @@ class JcsSearchView @JvmOverloads constructor(
                 closeSearch()
             }
         }
-
         initSearchView()
     }
 
+    @SuppressLint("CustomViewStyleable")
     private fun initStyle(attributeSet: AttributeSet?, defStyleAttribute: Int) {
         AppCompatDelegate.setCompatVectorFromResourcesEnabled(true)
         val typedArray = mContext.obtainStyledAttributes(
@@ -122,7 +123,7 @@ class JcsSearchView @JvmOverloads constructor(
             setTextColor(
                 typedArray.getColor(
                     R.styleable.BlankSheetSearchView_android_textColor,
-                    ContextCompat.getColor(mContext, R.color.black)
+                    ContextCompat.getColor(mContext, R.color.appbar_color_icon)
                 )
             )
         }

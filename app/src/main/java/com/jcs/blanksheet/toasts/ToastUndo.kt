@@ -1,4 +1,4 @@
-package com.jcs.blanksheet.widget
+package com.jcs.blanksheet.toasts
 
 import android.animation.ObjectAnimator
 import android.annotation.SuppressLint
@@ -22,15 +22,15 @@ class ToastUndo(private val activity: Activity?, private val view: View) {
     private var listener: OnUndoClickListener? = null
     private var mToast: PopupWindow? = null
     private var viewTranslationY = 0f
-
+    
     companion object {
         const val LENGTH_LONG = 3500
         const val LENGTH_SHORT = 2000
-
+        
         const val LENGTH_SUPER_LONG = 5000
-
+        
     }
-
+    
     @SuppressLint("InflateParams")
     private fun getToast(): PopupWindow {
         val inflater =
@@ -39,41 +39,41 @@ class ToastUndo(private val activity: Activity?, private val view: View) {
         val textUndo = layout.findViewById<TextView>(R.id.text_toast_undo)
         val textCount = layout.findViewById<TextView>(R.id.progress_toast_count)
         val progress = layout.findViewById<CircularProgressBar>(R.id.progress_toast)
-
+        
         layout.measure(
             ViewGroup.LayoutParams.MATCH_PARENT,
             ViewGroup.LayoutParams.WRAP_CONTENT
         )
-
+        
         viewTranslationY = layout.measuredHeight - view.paddingBottom.toFloat()
-
+        
         val popupWindow = PopupWindow(
             layout,
             WindowManager.LayoutParams.MATCH_PARENT,
             WindowManager.LayoutParams.WRAP_CONTENT
         )
-
+        
         popupWindow.elevation =
             activity.resources.getDimensionPixelSize(R.dimen.toast_elevation).toFloat()
-
+        
         progress.setProgressWithAnimation(0f, LENGTH_SUPER_LONG.toLong())
         progress.onProgressChangeListener = {
             textCount.text = it.toInt().toString()
             if (it.equals(1f)) popupWindow.dismiss()
         }
-
+        
         textUndo.setOnClickListener {
             listener!!.onUndoClick(this)
         }
-
+        
         popupWindow.setOnDismissListener {
             lowerAnimateView()
         }
-
-        popupWindow.animationStyle = R.style.JcsAnimationToast
+        
+        popupWindow.animationStyle = R.style.AnimToastUndo
         return popupWindow
     }
-
+    
     fun show() {
         val toast = getToast()
         mToast = toast
@@ -90,11 +90,11 @@ class ToastUndo(private val activity: Activity?, private val view: View) {
             toast.dismiss()
         }, LENGTH_SUPER_LONG.toLong())
     }
-
+    
     fun dismiss() {
         mToast!!.dismiss()
     }
-
+    
     private fun liftAnimateView() {
         ObjectAnimator.ofFloat(view, "translationY", -(viewTranslationY + 5)).apply {
             duration = 200
@@ -102,7 +102,7 @@ class ToastUndo(private val activity: Activity?, private val view: View) {
             start()
         }
     }
-
+    
     private fun lowerAnimateView() {
         ObjectAnimator.ofFloat(view, "translationY", 0f).apply {
             duration = 200
@@ -110,11 +110,11 @@ class ToastUndo(private val activity: Activity?, private val view: View) {
             start()
         }
     }
-
+    
     private fun setOnUndoClickListener(listener: OnUndoClickListener) {
         this.listener = listener
     }
-
+    
     fun setOnUndoClickListener(listener: (toastUndo: ToastUndo) -> Unit) {
         setOnUndoClickListener(object : OnUndoClickListener {
             override fun onUndoClick(toastUndo: ToastUndo) {
@@ -122,9 +122,9 @@ class ToastUndo(private val activity: Activity?, private val view: View) {
             }
         })
     }
-
+    
     interface OnUndoClickListener {
         fun onUndoClick(toastUndo: ToastUndo)
     }
-
+    
 }

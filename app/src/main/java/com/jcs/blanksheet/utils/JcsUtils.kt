@@ -1,7 +1,6 @@
 package com.jcs.blanksheet.utils
 
 import android.Manifest
-import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
@@ -18,7 +17,7 @@ import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import com.jcs.blanksheet.R
-import com.jcs.blanksheet.model.Document
+import com.jcs.blanksheet.entity.Document
 import org.jetbrains.anko.withAlpha
 import java.io.*
 import java.text.SimpleDateFormat
@@ -30,11 +29,6 @@ import java.util.*
  */
 
 class JcsUtils {
-
-    @SuppressLint("ConstantLocale")
-    private val defaultLocale = Locale.getDefault()
-    private val calendar = Calendar.getInstance()
-
     companion object {
         private const val PATTERN_FORMAT_DATE_USA = "MMM dd',' yyyy hh:mm a"
         private const val PATTERN_FORMAT_DATE_BR = "dd 'de' MMM 'de' yyyy hh:mm a"
@@ -47,6 +41,7 @@ class JcsUtils {
      * @return String
      **/
     fun actualDate(): String {
+
         val br = Locale("pt", "BR")
         val pt = Locale("pt", "PT")
         val usa: Locale = Locale.US
@@ -55,42 +50,41 @@ class JcsUtils {
         val formatBR = SimpleDateFormat(PATTERN_FORMAT_DATE_BR, br)
         val format = SimpleDateFormat(PATTERN_FORMAT_DATE_DEFAULT, Locale.getDefault())
 
-        return when (defaultLocale) {
-            usa -> formatUSA.format(calendar.time)
-            br, pt -> formatBR.format(calendar.time)
-            else -> format.format(calendar.time)
+        return when (Locale.getDefault()) {
+            usa -> formatUSA.format(Calendar.getInstance().time)
+            br, pt -> formatBR.format(Calendar.getInstance().time)
+            else -> format.format(Calendar.getInstance().time)
         }
     }
 
 
     /**
-     * Obtem a data atual em milissegundos
+     * Obtém a data atual no formato yyyy-MM-dd'T'HH:mm:ss.SSS para ordenar
      *
      * @return String
      **/
-    // fun dateForOrder(): String = System.currentTimeMillis().toString()
     fun dateForOrder(): String {
         return SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS", Locale.getDefault()).format(Date())
             .toString()
     }
 
     /**
-     * Obtem a primeira letra do título
+     * Obtém a primeira letra do título
      *
      * @return String
      **/
     fun getFirstLetter(text: String): String = text.first().toString().capitalize(Locale.ROOT)
 
     /**
-     * Obtem o icon
+     * Obtém o icon
      *
-     * @param context
-     * @param color
+     * @param title
+     *
      * @return GradientDrawable
      **/
 
-    fun iconTextDrawable(title: Any): GradientDrawable {
-        return roundedIconDrawable(ColorGenerator.MATERIAL.getColor(title).withAlpha(70))
+    fun iconTextDrawable(doc: Document): GradientDrawable {
+        return roundedIconDrawable(ColorGenerator.MATERIAL.getColor(doc).withAlpha(70))
     }
 
     fun roundedIconDrawable(color: Int): GradientDrawable {
@@ -125,57 +119,6 @@ class JcsUtils {
         val actionBarSize = styledAttributes.getDimension(0, 0f).toInt()
         styledAttributes.recycle()
         return actionBarSize
-    }
-
-    /**
-     *  Ordena os documentos de acordo com os dados guardados no SharePreference
-     *
-     *  @param context
-     *  @param documents
-     *  @return Int
-     * */
-    @SuppressLint("CommitPrefEdits")
-    fun onSortDocuments(context: Context, documents: ArrayList<Document>) {
-        //  val mPreferences = PreferenceManager.getDefaultSharedPreferences(context)
-        val mPreferences =
-            context.getSharedPreferences(Constants.RADIO_BUTTON, Context.MODE_PRIVATE)
-
-        val sortBy = mPreferences.getString(Constants.SORT_BY, Constants.SORT_BY_NAME_AZ)
-        //val isReverseMode = mPreferences.getBoolean(Constants.DIALOG_REVERSE_MODE, false)
-
-        when (sortBy) {
-            Constants.SORT_BY_NAME_AZ -> {
-                documents.let {
-                    it.sortWith { a, z ->
-                        a.title.capitalize(Locale.ROOT).compareTo(z.title.capitalize(Locale.ROOT))
-                    }
-                }
-            }
-            Constants.SORT_BY_NAME_ZA -> {
-                documents.let {
-                    it.sortWith { a, z ->
-                        z.title.capitalize(Locale.ROOT).compareTo(a.title.capitalize(Locale.ROOT))
-                    }
-                }
-            }
-            Constants.SORT_BY_DATE_RECENT -> {
-                documents.let {
-                    it.sortWith { new, old ->
-                        old.dateForOrder.capitalize(Locale.ROOT)
-                            .compareTo(new.dateForOrder.capitalize(Locale.ROOT))
-                    }
-                }
-            }
-            Constants.SORT_BY_DATE_OLDEST -> {
-                documents.let {
-                    it.sortWith { new, old ->
-                        new.dateForOrder.capitalize(Locale.ROOT)
-                            .compareTo(old.dateForOrder.capitalize(Locale.ROOT))
-                    }
-                }
-            }
-
-        }
     }
 
 //     fun hideKeyboard(view: View) {
